@@ -1,0 +1,268 @@
+body, html {
+	font-family: arial;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+textarea {
+	width: 500px;
+	height: 150px;
+}
+
+
+#main {
+	margin: auto;
+	width: 1000px;
+}
+
+header {
+	width: 100%;
+	padding-top: 20px;
+	background: #ba0c2f;
+	color: white;
+	text-align: center;
+}
+
+footer {
+	width: 100%;
+	padding: 10px 0;
+	background: #ba0c2f;
+	color: white;
+	text-align: center;
+}
+
+#content {
+	min-height: 400px;
+}
+
+
+.biggest-text {
+	font-size: 40pt;
+	padding: 5px 0;
+}
+
+.big-text {
+	font-size: 25pt;
+	padding: 5px 0;
+}
+
+.grey-hr {
+	background: #a7b1b7;
+	height: 2px;
+	width: 100%;
+}
+
+header nav {
+	text-align: left;
+}
+
+header nav .nav-item {
+	display: inline-block;
+	padding: 5px;
+	font-size: 15pt;
+	cursor: pointer;
+}
+
+header nav .nav-item:hover {
+	background: #e44e6c;
+}
+
+.page {
+	padding: 10px 0;
+}
+
+.page-title {
+	font-size: 18pt;
+}
+
+.page-description {
+	padding-bottom: 5px;
+}
+
+.alphabet-container {
+
+}
+
+.alphabet-container .alphabet-letter:first-child {
+	border-left: 1px solid black;
+}
+
+.alphabet-letter {
+	width: 25px;
+	height: 25px;
+	border: 1px solid black;
+	border-left: 0;
+	line-height: 25px;
+	text-align: center;
+	display: inline-block;
+}
+
+.page-section-title {
+	font-size: 15pt;
+	padding: 15px 0 5px 0;
+}
+
+.alphabet-plaintext {
+}
+
+.alphabet-plaintext .alphabet-letter {
+	background: #caebff;
+	text-transform: lowercase;
+}
+
+.alphabet-ciphertext .alphabet-letter {
+	border-top: 0;
+}
+
+.alphabet-desc {
+	display: inline-block;
+	padding-left: 5px;
+}
+
+#page-shift-key-container {
+	padding: 10px 0 0 0;
+}
+
+
+.shift-textarea-container {
+	width: 500px;
+	display: inline-block;
+
+}
+
+.shift-textarea-container textarea {
+	width: 480px;
+	height: 250px;
+}
+
+.frequency-table {
+	width: 998px;
+	border: 1px solid black;
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+
+th, td {
+	border: 1px solid black;
+	text-align: center;
+	font-size: 10pt;
+}
+
+.frequency-table tbody tr td:nth-child(2n) {
+	text-align: right;
+}
+
+a.f {
+	font-size: 10pt;
+	text-decoration: underline;
+}
+
+.page-shift-cipher-letter {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	width: 23px;
+	height: 23px;
+	text-align: center;
+	font-size: 12pt;
+}
+
+.remaining-letters {
+	padding: 5px 0;
+}
+
+.remaining-letter {
+	padding: 0 3px;
+	display: inline-block;
+}
+
+
+.vigenere-f {
+	display: inline-block;
+	width: 70px;
+	padding: 10px 0;
+	font-size: 9pt;
+}
+
+.vigenere-g {
+	display: inline-block;
+}
+
+.vigenere-repeated-number {
+	display: inline-block;
+	font-size: 10pt;
+	width: 30px;
+	text-align: center;
+}
+
+#vigenere-repeated-numbers {
+	font-weight: 800;
+}
+
+.key-container {
+	padding: 5px 0;
+}
+
+.key-letter-container {
+	display: inline-block;
+}
+
+.key-length, .key-letters {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.key-letter-container {
+	width: 30px;
+	font-family: monospace;
+	text-align: center;
+}
+
+.frequency-charts {
+	padding: 10px 0;
+	font-family: monospace;
+}
+
+.frequency-chart {
+	width: 234px;
+	height: 117px;
+	padding: 8px;
+	display: inline-block;
+}
+
+.freq-chart-title {
+	height: 15px;
+	border-bottom: 1px solid black;
+	text-align: center;
+	width: 100%;
+}
+
+.freq-column {
+	width: 9px;
+	display: inline-block;
+}
+
+.freq-bar-container {
+	height: 85px;
+	position: relative;
+}
+
+.freq-bar {
+	position: absolute;
+	bottom: 0;
+	margin: auto;
+	width: 7px;
+	background: black;
+}
+
+.freq-label {
+	border-top: 1px solid black;
+	height: 15px;
+}
