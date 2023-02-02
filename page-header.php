@@ -4,7 +4,7 @@
 	<title>LING 3801 Tools</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-sacle=1.0, user-scalable=no">
 	<meta charset="UTF-8">
-	<link href="resources/main.css" rel="stylesheet" type="text/css" />
+	<link href="<?php echo $__ROOTDIR__ ?>resources/main.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="main">

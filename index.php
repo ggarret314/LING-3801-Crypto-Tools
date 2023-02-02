@@ -1,6 +1,8 @@
 <?php 
 
-$__ROOTDIR__ = "https://gserver.gov/ling3801/";
+require_once("settings.php");
+
+$__ROOTDIR__ = $LING3801["root_dir"];
 
 
 
