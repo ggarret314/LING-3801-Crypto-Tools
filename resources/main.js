@@ -1,5 +1,6 @@
 // Everything here was written by Garret Gallion
 
+
 // Function whose primary purpose is for getting the word list txt files so I don't have to have them here.
 function _get(url, callback, formdata=null) {
 	var xmlHttp = new XMLHttpRequest();
@@ -13,7 +14,8 @@ function _get(url, callback, formdata=null) {
 
 
 
-
+// Sanitizer
+function text_sanitize(s) { return s.toUpperCase().replace(/[^A-Z]/g, "") }
 
 // Alphabet: The alphabet A-Z as a string.
 const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -21,11 +23,42 @@ const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 var top1000;
 // topWords: Array of the top some numebr of words in English.
 var topWords;
+var quadgramFitness = [];
+var quadgrams = [];
+var quadGRAMS = {};
+
 
 _get(__ROOTDIR__ + 'resources/top100000words.txt', (data) => {
 	topWords = data.replace(/\r/g, "").split("\n");
 	WordFinder._init();
 });
+
+
+_get(__ROOTDIR__ + 'resources/english_quadgrams.txt', data => {
+	// english_quadgrams.txt is from http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams
+	var x = data.replace(/\r/g, "").split("\n");
+	for (var i = 0; i < x.length; i++) {
+		var p = x[i].split(" ");
+		quadgrams.push(p[0]);
+		quadgramFitness.push(parseInt(p[1]));
+		
+	}
+
+
+	// find total number of quadrigrams.
+	var sum = quadgramFitness.reduce((a, b) => a + b, 0);
+	
+
+	// Calculate fitness of each quadrigram
+	for (var i = 0; i < quadgramFitness.length; i++) {
+		quadgramFitness[i] = Math.log(quadgramFitness[i]/sum);
+	}
+
+
+
+	TextFitness._init(sum);
+});
+
 
 // PageSwitcher: switches between pages for the different parts of the site. 
 
@@ -123,6 +156,33 @@ var WordFinder = {
 	}
 }
 
+// TextFitness: this is used by the auto solver and notably can calculate the fitness level of
+//              a particular text, i.e. a rating of how much it looks like English.
+var TextFitness = {
+	quadgrams: quadgrams,
+	fitness: null,
+	sum: null,
+	floor: null,
+	maximumFitness: -5.770749985466554,
+
+	_calcFitness: function (str) {
+		//str = text_sanitize(str);
+		var x = 0;
+		for (var i = 0; i < str.length - 4; i++) {
+			var a = Alphabet.indexOf(str[i]) * 17576 + Alphabet.indexOf(str[i + 1]) * 676 + Alphabet.indexOf(str[i + 2]) * 26 + Alphabet.indexOf(str[i + 3]);
+			x += quadGRAMS[a];
+		}
+
+		return x;
+	},
+
+	_init: function (sum) {
+		this.sum = sum;
+		this.floor = -1 * Math.log(0.01 / this.sum);
+		this.quadgrams = quadgrams;
+		this.fitness = quadgramFitness;
+	}
+}
 
 
 // EnglishFrequencies: a bunch of data about letter frequency and stuff like that

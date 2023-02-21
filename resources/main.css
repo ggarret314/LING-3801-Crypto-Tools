@@ -13,6 +13,7 @@ a {
 textarea {
 	width: 500px;
 	height: 150px;
+	resize: vertical;
 }
 
 
@@ -265,4 +266,169 @@ a.f {
 .freq-label {
 	border-top: 1px solid black;
 	height: 15px;
+}
+
+.playfair-grid-container {
+	user-select: none;
+}
+
+.playfair-grid-row {
+	width: 183px;
+}
+
+.playfair-grid-row:first-child 
+.playfair-grid-letter {
+	border-top: 1px solid black;
+}
+
+.playfair-grid-row:first-child 
+.playfair-grid-mover {
+	border-top: 1px solid transparent;
+}
+
+.playfair-grid-mover {
+	vertical-align: top;
+	display: inline-block;
+	width: 25px;
+	height: 25px;
+	text-align: center;
+	line-height: 25px;
+	cursor: pointer;
+}
+
+.playfair-grid-mover-row
+.playfair-grid-mover {
+	border-right: 1px solid transparent;
+}
+
+.playfair-grid-mover-row
+.playfair-grid-mover:first-child {
+	border-left: 1px solid transparent;
+}
+
+
+.playfair-grid-letter {
+	border: 1px solid black;
+	border-left: 0;
+	border-top: 0;
+	display: inline-block;
+	line-height: 25px;
+	text-align: center;
+	width: 25px;
+	height: 25px;
+}
+
+.playfair-grid-letter:first-child {
+	border-left: 1px solid black;
+}
+
+
+.playfair-grid-letter-input {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	width: 23px;
+	height: 23px;
+	text-align: center;
+	font-size: 12pt;
+}
+
+.frequency-table-two {
+	width: 300px;
+	border: 1px solid black;
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+.page-split {
+	display: inline-block; 
+	width: 500px;
+	vertical-align: top;
+}
+
+.highlighted {
+	background-color: #e7cfcf;
+	font-weight: 600;
+}
+
+#playfair-pattern-input {
+	font-family: consolas;
+}
+
+#playfair-pattern-container {
+	height: 350px;
+	overflow-y: scroll;
+}
+
+#playfair-pattern-container li {
+	padding: 5px 0;
+}
+
+#playfair-deciphering-container {
+	font-family: monospace;
+	font-size: 15px;
+	padding-bottom: 10px;
+}
+
+.deciphering-block {
+	display: inline-block;
+	padding-right: 5px;
+	padding-bottom: 10px;
+}
+
+.plain-row {
+	color: #6b2509;
+}
+
+.playfair-crib {
+	padding: 5px 0;
+}
+
+.playfair-crib-left,
+.playfair-crib-middle,
+.playfair-crib-right {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.playfair-crib-btn-delete {
+	color: red;
+}
+
+.playfair-crib-left {
+	width: 30px;
+}
+
+.playfair-crib-top {
+}
+
+.playfair-crib-bigram {
+	display: inline-block;
+	font-family: monospace;
+	font-size: 20px;
+	width: 35px;
+	height: 30px;
+	text-align: center;
+	vertical-align: top;
+}
+
+.playfair-crib-bigram-input {
+	width: 30px;
+	height: 30px;
+	font-family: monospace;
+	font-size: 20px;
+	box-sizing: border-box;
+}
+
+#playfair-crib-input {
+	font-family: monospace;
+}
+
+.playfair-crib-translation {
+	padding: 5px 0;
+}
+
+.playfair-crib-btn-delete {
+	height: 30px;
+	box-sizing: border-box;
 }

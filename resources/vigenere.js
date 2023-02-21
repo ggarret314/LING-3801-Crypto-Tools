@@ -181,7 +181,9 @@ var Vigenere = {
 		</div>*/
 		if (index !== -1) {
 			// update a specific table
-			var pt = document.getElementById("vigenere-textarea-plaintext").value;
+			var pt = this.manualMode ? 
+				document.getElementById("vigenere-textarea-ciphertext").value :
+				document.getElementById("vigenere-textarea-plaintext").value;
 
 			pt = pt.toUpperCase().replace(/[^A-Z]/g, "");
 
@@ -300,8 +302,9 @@ var Vigenere = {
 		e.target.parentNode.parentNode.children[1].innerHTML = nextKey;
 		document.getElementById("vigenere-keyphrase-textfield").value = Vigenere.key;
 
-		Vigenere._manualDecipher();
+		Vigenere.manualMode ? Vigenere._manualEncipher() : Vigenere._manualDecipher();
 		Vigenere._updateFreqCharts();
+		Vigenere._updateRepeated();
 	},
 
 	__decreaseLetter__: function (e) {
@@ -313,8 +316,9 @@ var Vigenere = {
 		e.target.parentNode.parentNode.children[1].innerHTML = nextKey;
 		document.getElementById("vigenere-keyphrase-textfield").value = Vigenere.key;
 
-		Vigenere._manualDecipher();
+		Vigenere.manualMode ? Vigenere._manualEncipher() : Vigenere._manualDecipher();
 		Vigenere._updateFreqCharts();
+		Vigenere._updateRepeated();
 	},
 
 	__keyLength__: function (e) {

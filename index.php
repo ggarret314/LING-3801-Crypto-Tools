@@ -15,18 +15,20 @@ for($i = 0; $i < count($params); $i+=2) {
 
 // Valid page names. Anything else the user attempts to access is discarded.
 $pageNames = array(
-	"otherstuff", "shift", "monoalphabetic", "vigenere"
+	"otherstuff", "shift", "monoalphabetic", "vigenere", "playfair"
 );
 
 $pageScripts = array();
 
 $page_bottomscripts = array();
 array_push($page_bottomscripts, "{$__ROOTDIR__}resources/main.js");
+array_push($page_bottomscripts, "{$__ROOTDIR__}resources/quadgrams.js");
 
 switch($params[0]) {
 	case "shift":
 	case "monoalphabetic":
 	case "vigenere":
+	case "playfair":
 		array_push($page_bottomscripts, "{$__ROOTDIR__}resources/{$params[0]}.js");
 		break;
 }

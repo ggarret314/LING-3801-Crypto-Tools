@@ -19,6 +19,8 @@
 			<a href="<?php echo $__ROOTDIR__ ?>monoalphabetic">Monoalphabetic</a>
 		</div><div class="nav-item">
 			<a href="<?php echo $__ROOTDIR__ ?>vigenere">Vigenere</a>
+		</div><div class="nav-item">
+			<a href="<?php echo $__ROOTDIR__ ?>playfair">Playfair</a>
 		</div>
 	</nav>
 	<div class="grey-hr"></div>
