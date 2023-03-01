@@ -15,7 +15,7 @@ for($i = 0; $i < count($params); $i+=2) {
 
 // Valid page names. Anything else the user attempts to access is discarded.
 $pageNames = array(
-	"otherstuff", "shift", "monoalphabetic", "vigenere", "playfair"
+	"mono", "poly", "digraph", "trans", "auto"
 );
 
 $pageScripts = array();
@@ -25,12 +25,23 @@ array_push($page_bottomscripts, "{$__ROOTDIR__}resources/main.js");
 array_push($page_bottomscripts, "{$__ROOTDIR__}resources/quadgrams.js");
 
 switch($params[0]) {
+	case "mono":
+	case "poly":
+	case "digraph":
+	case "trans":
+	case "auto":
+		array_push($page_bottomscripts, "{$__ROOTDIR__}resources/{$params[0]}.js");
+		break;
+
+	/*
 	case "shift":
 	case "monoalphabetic":
 	case "vigenere":
 	case "playfair":
+	case "auto";
 		array_push($page_bottomscripts, "{$__ROOTDIR__}resources/{$params[0]}.js");
 		break;
+	*/
 }
 
 include_once("page-header.php");

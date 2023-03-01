@@ -6,7 +6,19 @@ body, html {
 }
 
 a {
+	color: red;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+nav a {
 	color: inherit;
+}
+
+nav a:hover {
 	text-decoration: none;
 }
 
@@ -19,7 +31,8 @@ textarea {
 
 #main {
 	margin: auto;
-	width: 1000px;
+	width: 100%;
+	max-width: 1000px;
 }
 
 header {
@@ -40,6 +53,8 @@ footer {
 
 #content {
 	min-height: 400px;
+	box-sizing: border-box;
+	padding: 0 10px;
 }
 
 
@@ -130,15 +145,26 @@ header nav .nav-item:hover {
 	padding: 10px 0 0 0;
 }
 
-
-.shift-textarea-container {
-	width: 500px;
-	display: inline-block;
+.textarea-container {
 
 }
 
-.shift-textarea-container textarea {
-	width: 480px;
+.monospace {
+	font-family: monospace;
+}
+
+.bigger-text {
+	font-size: 13pt;
+}
+
+.title-options {
+	font-size: 12pt;
+}
+
+.textarea-container textarea {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 800px;
 	height: 250px;
 }
 
@@ -431,4 +457,36 @@ a.f {
 .playfair-crib-btn-delete {
 	height: 30px;
 	box-sizing: border-box;
+}
+
+.control-direction-container,
+.control-direction {
+	display: inline-block;
+}
+
+.control-direction {
+	cursor: pointer;
+}
+
+#control-encipher {
+	border: 1px solid black;
+	padding: 0 5px;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+
+#control-decipher {
+	border: 1px solid black;
+	border-left: 0;
+	padding: 0 5px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
+.cipher-list > li {
+	padding: 5px 0;
+}
+
+h3 {
+	margin: 5px 0;
 }

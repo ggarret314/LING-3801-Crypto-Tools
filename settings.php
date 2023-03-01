@@ -2,7 +2,7 @@
 
 
 $LING3801 = array(
-	"root_dir" => "https://localhost/ling3801"
+	"root_dir" => "https://gserver.gov/ling3801/"
 );
 
 ?>

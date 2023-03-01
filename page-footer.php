@@ -5,7 +5,7 @@
 </footer>
 </div>
 <script type="text/javascript">var __ROOTDIR__ = "<?php echo $__ROOTDIR__ ?>";</script>
-<?php foreach($page_bottomscripts as $key => &$script): ?><script type="text/javascript" src="<?php echo $script ?>"></script><?php endforeach ?>
+<?php //foreach($page_bottomscripts as $key => &$script): ?><script type="module" src="<?php echo $script ?>"></script><?php //endforeach ?>
 
 </body>
 </html>

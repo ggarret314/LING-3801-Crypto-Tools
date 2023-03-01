@@ -1,0 +1,1 @@
+<div style="padding-top: 10px;"><a href="<?php echo $__ROOTDIR__ ?>">Back to home</a></div>

@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>LING 3801 Tools</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-sacle=1.0, user-scalable=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta charset="UTF-8">
 	<link href="<?php echo $__ROOTDIR__ ?>resources/main.css" rel="stylesheet" type="text/css" />
 </head>
@@ -14,13 +14,17 @@
 	<div class="grey-hr"></div>
 	<nav>
 		<div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>shift">Shift</a>
+			<a href="<?php echo $__ROOTDIR__ ?>">Home</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>monoalphabetic">Monoalphabetic</a>
+			<a href="<?php echo $__ROOTDIR__ ?>auto">Auto-Solver</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>vigenere">Vigenere</a>
+			<a href="<?php echo $__ROOTDIR__ ?>mono/shift">Shift</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>playfair">Playfair</a>
+			<a href="<?php echo $__ROOTDIR__ ?>mono/substitution">Substitution</a>
+		</div><div class="nav-item">
+			<a href="<?php echo $__ROOTDIR__ ?>poly/vigenere">Vigenere</a>
+		</div><div class="nav-item">
+			<a href="<?php echo $__ROOTDIR__ ?>digraph/playfair">Playfair</a>
 		</div>
 	</nav>
 	<div class="grey-hr"></div>

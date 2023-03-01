@@ -14,11 +14,12 @@ function _get(url, callback, formdata=null) {
 
 
 
+
 // Sanitizer
-function text_sanitize(s) { return s.toUpperCase().replace(/[^A-Z]/g, "") }
+export function text_sanitize(s) { return s.toUpperCase().replace(/[^A-Z]/g, "") }
 
 // Alphabet: The alphabet A-Z as a string.
-const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+export const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 // top1000: Array of the top 1,000 words in English.
 var top1000;
 // topWords: Array of the top some numebr of words in English.
@@ -27,14 +28,17 @@ var quadgramFitness = [];
 var quadgrams = [];
 var quadGRAMS = {};
 
-
-_get(__ROOTDIR__ + 'resources/top100000words.txt', (data) => {
+var rd = "";
+if (typeof __ROOTDIR__ !== "undefined") {
+	rd = __ROOTDIR__;
+}
+_get(rd + 'resources/top100000words.txt', (data) => {
 	topWords = data.replace(/\r/g, "").split("\n");
 	WordFinder._init();
 });
 
 
-_get(__ROOTDIR__ + 'resources/english_quadgrams.txt', data => {
+_get(rd + 'resources/english_quadgrams.txt', data => {
 	// english_quadgrams.txt is from http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams
 	var x = data.replace(/\r/g, "").split("\n");
 	for (var i = 0; i < x.length; i++) {
@@ -64,7 +68,7 @@ _get(__ROOTDIR__ + 'resources/english_quadgrams.txt', data => {
 
 // WordFinder: this helps automatically determine where spaces should be in a string (plain text).
 //             based off of https://stackoverflow.com/questions/8870261
-var WordFinder = {
+export var WordFinder = {
 	words: null,
 	wordCosts: {},
 	maxWordLength: 0,
@@ -158,12 +162,29 @@ var WordFinder = {
 
 // TextFitness: this is used by the auto solver and notably can calculate the fitness level of
 //              a particular text, i.e. a rating of how much it looks like English.
-var TextFitness = {
+export var TextFitness = {
 	quadgrams: quadgrams,
 	fitness: null,
 	sum: null,
 	floor: null,
-	maximumFitness: -5.770749985466554,
+	maximumFitness: -2.47255834766,
+	guessFitness:   -4.03202300729,
+	minimumFitness: -7.02886084843,
+
+	_calcBestFitness: function (x) {
+		// given a string length, calculate what the best possible fitness would be
+		return (x - 3) * this.maximumFitness;
+	},
+
+	_calcGuessFitness: function (x) {
+		return (x - 3) * this.guessFitness;
+	},
+
+	_calcMinimumFitness: function (x) {
+		return (x - 3) * this.minimumFitness;
+	},
+
+	// ABCD
 
 	_calcFitness: function (str) {
 		//str = text_sanitize(str);
@@ -187,7 +208,7 @@ var TextFitness = {
 
 // EnglishFrequencies: a bunch of data about letter frequency and stuff like that
 //                     currently data pulled from: https://www3.nd.edu/~busiforc/handouts/cryptography/Letter%20Frequencies.html#Results_from_Project_Gutenberg
-var EnglishFrequencies = {
+export var EnglishFrequencies = {
 	freqLetters: [
 		['E', 100.00],['T', 72.24],['A', 63.62],['O', 60.36],['I', 55.03],['N', 54.90],['S', 50.42],
 		['H', 49.59], ['R', 47.39],['D', 34.34],['L', 32.26],['U', 22.60],['C', 20.48],['M', 20.36],
@@ -214,3 +235,17 @@ var EnglishFrequencies = {
 }
 
 
+
+
+var msg = {
+	task: "solve",
+	data: {
+		startKey: "",
+		ct: "",
+		ciphers: ["vigenere"],
+		Temp: 20,
+		Step: 0.2,
+		Count: 50000,
+		stopWhenNear: true
+	}
+}
