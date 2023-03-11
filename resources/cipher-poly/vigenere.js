@@ -1,82 +1,73 @@
-// Vigenere: holds code for vigenere cipher.
-var Vigenere = {
+import { Alphabet, text_sanitize, WordFinder } from '../main.js';
+import { Cipher } from '../cipher.js';
+import { CipherDirection } from '../cipherdirection.js';
 
-	key: "A",
+// VigenereCipher: holds code for vigenere cipher.
 
+const VigenereCipher = {
 
-	get manualMode() { return document.getElementById("vigenere-manual-mode").checked },
-	set manualMode(x) { document.getElementById("vigenere-manual-mode").checked = x },
-	keyLength: 1,
-	repeatedResultElements: [],
+	key: "AAAA",
+	maxKeyLength: 32,
+
+	ele: {
+		decipherBox: 		document.getElementById("decipher-box"),
+		encipherBox: 		document.getElementById("encipher-box"),
+		ptOptions:			document.getElementById("plaintext-options"),
+		textareaCiphertext: document.getElementById("textarea-ciphertext"),
+		textareaPlaintext:  document.getElementById("textarea-plaintext"),
+		keyPhrase: document.getElementById("key-phrase"),
+		keySetCipherBtn: document.getElementById("key-set-cipher-btn"),
+		keyClearBtn: document.getElementById("key-clear-btn"),
+		keyCt: document.getElementById("key-ct"),
+		keyLettersContainer: document.getElementById("key-letters"),
+		keyLetters: [],
+		keyLength: document.getElementById("key-length"),
+		frequencyTable: document.getElementById("frequency-table"),
+		viewAnalysis: document.getElementById("view-analysis"),
+		analysisContainer: document.getElementById("analysis-container"),
+		checkboxAutoSpaces: document.getElementById("auto-spaces"),
+		repeatedHeaders: document.getElementById("repeated-headers"),
+		repeatedContents: document.getElementById("repeated-contents"),
+		frequencyCharts: document.getElementById("frequency-charts")
+	},
 
 	freqCharts: [],
 
-	// zfmkbdyn
+	__keyLength: 4,
 
-	_decipher: function(key, ct) {
-		var pt = "";
-
-		for (var i = 0; i < ct.length; i++) {
-			var a = Alphabet.indexOf(key[i % key.length]);
-			pt += Alphabet[(Alphabet.indexOf(ct[i]) - a + 26) % 26];
+	get keyLength() { return this.__keyLength },
+	
+	set keyLength(x) {
+		x = parseInt(x);
+		this.__keyLength = x > 0 && x < this.maxKeyLength ? x : 1;
+		if (this.keyLength > this.key.length) {
+			for (var i = this.key.length; i < this.keyLength; i++) this.key += "A";
+		} else if (this.keyLength < this.key.length) {
+			this.key = this.key.slice(0, this.keyLength);
 		}
-
-		return pt;
+		if (this.cipherDirection.isEncipher) this._encipher();
+		else this._decipher();
 	},
 
-	_encipher: function (key, pt) {
-		var ct = "";
+	_initRepeated: function() {
+		this.ele.repeatedHeaders.innerHTML = "";
+		this.ele.repeatedContents.innerHTML = "";
+		for (var i = 2; i <= this.maxKeyLength; i++) {
+			var th = document.createElement("th"),
+				td = document.createElement("td");
+			
+			th.innerHTML = i;
+			td.innerHTML = "0";
 
-		for (var i = 0; i < pt.length; i++) {
-			var a = Alphabet.indexOf(key[i % key.length]);
-			ct += Alphabet[(Alphabet.indexOf(pt[i]) + a) % 26];
+			this.ele.repeatedHeaders.appendChild(th);
+			this.ele.repeatedContents.appendChild(td);
 		}
-
-		return ct;
-	},
-
-	_manualDecipher: function () {
-		var ct = document.getElementById("vigenere-textarea-ciphertext").value;
-		ct = ct.toUpperCase().replace(/[^A-Z]/g, "");
-
-		var pt = this._decipher(this.key, ct);
-
-		document.getElementById("vigenere-textarea-plaintext").value = pt.toLowerCase();
-	},
-
-	_manualEncipher: function () {
-		var pt = document.getElementById("vigenere-textarea-plaintext").value;
-		pt = pt.toUpperCase().replace(/[^A-Z]/g, "");
-		
-		var ct = "";
-
-		for (var i = 0; i < pt.length; i++) {
-			var keyIndex = Alphabet.indexOf(this.key[i % this.keyLength]);
-			ct += Alphabet[(26 + Alphabet.indexOf(pt[i]) + keyIndex) % 26];
-			if ((i + 1) % 5 == 0) ct += " ";
-		}
-
-		document.getElementById("vigenere-textarea-ciphertext").value = ct;
-
-	},
-
-	_autoSolver: function () {
-		
-	},
-
-	_autoSolve: function () {
-
-	},
-
-	_autoSolveVisualizer: function () {
-
 	},
 
 	_updateRepeated: function () {
 
-		var ct = document.getElementById("vigenere-textarea-ciphertext").value;
-		ct = ct.toUpperCase().replace(/[^A-Z]/g, "");
-		this._icStats(ct);
+		var ct = text_sanitize(this.ele.textareaCiphertext.value);
+		var icStats = this._icStats(ct);
 		var seqs = [];
 		for (var i = 0; i < 6; i++) seqs.push([]);
 		// fill the sequences
@@ -114,58 +105,96 @@ var Vigenere = {
 
 
 
-		//console.log("dists", dists);
-		//console.log("seqs", seqs);
-		//console.log("sequences", sequences);
-		//console.log("repeated:", repeatedSeq);
-		//console.log("spacing actors: ", spacingFactors);
-		/*
-		
-		
-
-		// Add sequences by index. This first iteration will eliminate forward duplicated sequences.
-		var repeatedByIndex = {};
-		for (var seq in sequences) if (sequences[seq].length > 1) {
-			sequences[seq].forEach(index => {
-				if (!(index in repeatedByIndex)) {
-					repeatedByIndex[index] = seq;
-					//if (!(index - 1 in repeatedByIndex) || (repeatedByIndex[index - 1].indexOf(seq) == -1)) repeatedByIndex[index] = seq;
-				}// else if (seq.length > repeatedByIndex[index].length) repeatedByIndex[index] = seq;
-			});
-		}
-		
-		// This iteration will eliminate backward duplicated sequences.
-		console.log(Object.keys(repeatedByIndex).map(Number).reverse());
-		Object.keys(repeatedByIndex).map(Number).reverse().forEach(index => {
-			if (index - 1 in repeatedByIndex && repeatedByIndex[index - 1].indexOf(repeatedByIndex[index]) != -1) delete repeatedByIndex[index];
-
-		});
-
-
-		// Put all of the repeated sequences in the repeatedSeq object
-		for (var index in repeatedByIndex) {
-			if (!(repeatedByIndex[index] in repeatedSeq)) {
-				repeatedSeq[repeatedByIndex[index]] = [];
-				console.log(repeatedByIndex[index]);
-			}
-			repeatedSeq[repeatedByIndex[index]].push(index);
-		}
-
-		
-		
-		*/
 
 		// Put the factors in their elements
-		for (var i = 0; i < 31; i++) {
-			this.repeatedResultElements[i].innerHTML = spacingFactors[i + 2];
+		for (var i = 0; i < this.maxKeyLength - 1; i++) {
+			this.ele.repeatedContents.children[i].innerHTML = spacingFactors[i + 2];
 		}
+
+	},
+
+	_decipher: function () {
+		var key = this.key,
+			ct  = text_sanitize(this.ele.textareaCiphertext.value),
+			pt  = Cipher.poly.vigenere._decipher(key, ct);
+		
+		this._updateRepeated();
+		//this.frequencyTable._updateFrequencyTable(ct);
+		//this.decipheringContainer._update(ct, pt[0].toLowerCase());
+		this.ele.textareaPlaintext.value = (this.ele.checkboxAutoSpaces.checked ? WordFinder._wordFind(pt) : pt).toLowerCase();
+		this._updateFreqCharts();
+	},
+
+	_encipher: function () {
+		var key = this.key,
+			pt  = text_sanitize(this.ele.textareaPlaintext.value),
+			ct  = Cipher.poly.vigenere._encipher(key, pt);
+		
+			this._updateRepeated();
+			//this.frequencyTable._updateFrequencyTable(ct);
+			//this.decipheringContainer._update(ct, pt[0].toLowerCase());
+			this.ele.textareaCiphertext.value = ct;
+			this._updateFreqCharts();
+	},
+
+	_updateFreqCharts: function (index = -1) {
+		if (index !== -1) {
+			// update a specific table
+			var pt = text_sanitize(this.ele.textareaPlaintext.value);
+			
+			// get list of letters incrementing by the key length starting at index
+			var letters = {}
+			for (var i = index; i < pt.length; i += this.keyLength) {
+				if (!(pt[i] in letters)) letters[pt[i]] = 0;
+				letters[pt[i]]++;
+			}
+
+			// get letter with max value
+			var maxLetterValue = 0;
+			for (var letter in letters) {
+				if (letters[letter] > maxLetterValue) maxLetterValue = letters[letter];
+			}
+
+			// update the chart with relative letter frequencies
+			var freqChart = this.freqCharts[index];
+			for (var i = 0; i < 26; i++) {
+				var bar = freqChart.getElementsByClassName("freq-bar")[i];
+				var val = (Alphabet[i] in letters ? letters[Alphabet[i]] : 0) * 100 / maxLetterValue;
+				val = parseInt(val) + "%";
+				bar.style.height = val;
+			}
+
+		} else {
+			// destroy and rebuild all the tables
+			this.ele.frequencyCharts.innerHTML = "";
+			this.freqCharts = [];
+			for (var i = 0; i < this.keyLength; i++) {
+				var freqChart = document.createElement("div");
+				freqChart.setAttribute("class", "frequency-chart");
+				freqChart.innerHTML = "<div class='freq-chart-title'><input data-i='" + i + "' class='small-btn' type='button' value='<' /> " + this.key[i] + " <input data-i='" + i + "' class='small-btn' type='button' value='>' /></div>";
+				for (var j = 0; j < 26; j++) {
+					var freqColumn = document.createElement("div");
+					freqColumn.setAttribute("class", "freq-column");
+					freqColumn.innerHTML = 
+						"<div class='freq-bar-container'><div class='freq-bar' style='height: 0%'></div></div><div class='freq-label'>" + Alphabet[j] + "</div>";
+					freqChart.appendChild(freqColumn);
+				}
+				this.ele.frequencyCharts.appendChild(freqChart);
+				this.freqCharts.push(freqChart);
+				freqChart.getElementsByTagName("input")[0].addEventListener("click", this.__decreaseLetter__);
+				freqChart.getElementsByTagName("input")[1].addEventListener("click", this.__increaseLetter__);
+			}
+
+			for (var i = 0; i < this.keyLength; i++) this._updateFreqCharts(i);
+		}
+		
 
 	},
 
 	_icStats: function (s, maxKeyLength=32) {
 		var stats = {
 			bestKeyLengths: [],
-		}
+		} 
 		
 		var cosets = {}
 		for (var i = 1; i <= maxKeyLength; i++) {
@@ -211,205 +240,99 @@ var Vigenere = {
 		
 		
 		//console.log(cosets);
-		console.log(stats);
 
 		return stats;
 	},
 
-	_updateKeyLength: function () {
-		var keyLettersElement = document.getElementById("vigenere-key-letters");
-
-		this.keyLength = parseInt(document.getElementById("vigenere-key-length").value);
-
-		if (this.keyLength > this.key.length) {
-			for (var i = this.key.length; i < this.keyLength; i++) this.key += "A";
-		} else if (this.keyLength < this.key.length) {
-			this.key = this.key.slice(0, this.keyLength);
-		}
-
-		keyLettersElement.innerHTML = "";
-		for (var i = 0; i < this.keyLength; i++) {
-			var keyContainer = document.createElement("div");
-			keyContainer.setAttribute("class", "key-letter-container");
-			keyContainer.innerHTML = 
-				"<div class='key-letter-control'><input data-i='" + i + "' type='button' value='^'></div>" + 
-				"<div class='key-letter'>" + this.key[i] + "</div>" + 
-				"<div class='key-letter-control'><input data-i='" + i + "' type='button' value='v'></div>";
-			keyLettersElement.append(keyContainer);
-			keyContainer.getElementsByTagName("input")[0].addEventListener('click', this.__increaseLetter__);
-			keyContainer.getElementsByTagName("input")[1].addEventListener('click', this.__decreaseLetter__);
-		}
-
-		document.getElementById("vigenere-keyphrase-textfield").value = Vigenere.key;
-		this._updateFreqCharts();
-	},
-
-	_updateFreqCharts: function (index = -1) {
-		/*<div class="frequency-chart">
-			<div class="freq-column">
-				<div class="freq-bar-container"><div class="freq-bar" style="height: 10%"></div></div><div class="freq-label">A</div>
-			</div><div class="freq-column">
-				<div class="freq-bar-container"><div class="freq-bar" style="height: 100%"></div></div><div class="freq-label">B</div>
-			</div><div class="freq-column">
-				<div class="freq-bar-container"><div class="freq-bar" style="height: 60%"></div></div><div class="freq-label">C</div>
-			</div><div class="freq-column">
-				<div class="freq-bar-container"><div class="freq-bar" style="height: 0"></div></div><div class="freq-label">D</div>
-			</div>
-		</div>*/
-		if (index !== -1) {
-			// update a specific table
-			var pt = this.manualMode ? 
-				document.getElementById("vigenere-textarea-ciphertext").value :
-				document.getElementById("vigenere-textarea-plaintext").value;
-
-			pt = pt.toUpperCase().replace(/[^A-Z]/g, "");
-
-			// get list of letters incrementing by the key length starting at index
-			var letters = {}
-			for (var i = index; i < pt.length; i += this.keyLength) {
-				if (!(pt[i] in letters)) letters[pt[i]] = 0;
-				letters[pt[i]]++;
-			}
-
-			// get letter with max value
-			var maxLetterValue = 0;
-			for (var letter in letters) {
-				if (letters[letter] > maxLetterValue) maxLetterValue = letters[letter];
-			}
-
-			// update the chart with relative letter frequencies
-			var freqChart = this.freqCharts[index];
-			for (var i = 0; i < 26; i++) {
-				var bar = freqChart.getElementsByClassName("freq-bar")[i];
-				var val = (Alphabet[i] in letters ? letters[Alphabet[i]] : 0) * 100 / maxLetterValue;
-				val = parseInt(val) + "%";
-				bar.style.height = val;
-			}
-
-		} else {
-			// destroy and rebuild all the tables
-			var freqChartsElement = document.getElementById("vigenere-frequency-charts");
-			freqChartsElement.innerHTML = "";
-			this.freqCharts = [];
-			for (var i = 0; i < this.keyLength; i++) {
-				var freqChart = document.createElement("div");
-				freqChart.setAttribute("class", "frequency-chart");
-				freqChart.innerHTML = "<div class='freq-chart-title'>" + this.key[i] + "</div>";
-				for (var j = 0; j < 26; j++) {
-					var freqColumn = document.createElement("div");
-					freqColumn.setAttribute("class", "freq-column");
-					freqColumn.innerHTML = 
-						"<div class='freq-bar-container'><div class='freq-bar' style='height: 0%'></div></div><div class='freq-label'>" + Alphabet[j] + "</div>";
-					freqChart.appendChild(freqColumn);
-				}
-				freqChartsElement.appendChild(freqChart);
-				this.freqCharts.push(freqChart);
-			}
-
-			for (var i = 0; i < this.keyLength; i++) this._updateFreqCharts(i);
-		}
-		
-
-	},
-
-	_manualAutoSpacer: function () {
-		var pt = document.getElementById("vigenere-textarea-plaintext").value;
-		
-		// Serialize the string. This is removing any non-letter characters and setting all letters to UPPER CASE.
-		pt = pt.toUpperCase().replace(/[^A-Z]/g, "");
-
-		// Run the auto spacing thing
-		document.getElementById("vigenere-textarea-plaintext").value = WordFinder._wordFind(pt).toLowerCase();
-	},
-
-	_initKeyLength: function () {
-		document.getElementById("vigenere-key-length").value = 1;
-		this._updateKeyLength();
-	},
-
-	_initRepeated: function () {
-		var repeatedResultsElement = document.getElementById("vigenere-repeated-results");
-
-		for (var i = 0; i < 31; i++) {
-			var res = document.createElement("div");
-			res.setAttribute("class", "vigenere-repeated-number");
-			repeatedResultsElement.appendChild(res);
-			this.repeatedResultElements.push(res);
-		}
-	},
-
-
 	_init: function () {
+		var self = this;
+
 		this._initRepeated();
-		this._initKeyLength();
-		this._updateRepeated();
 
+		this.cipherDirection = new CipherDirection(
+			document.getElementById("control-encipher"),
+			document.getElementById("control-decipher"),
+			() => {
+				// Disable plaintext options
+				self.ele.ptOptions.style.display = "none";
 
-		//document.getElementById("vigenere-keyphrase-textfield").value = "A";
-		document.getElementById("vigenere-textarea-ciphertext").addEventListener("input", this.__textareaCiphertext__);
-		document.getElementById("vigenere-key-length").addEventListener("input", this.__keyLength__);
-		document.getElementById("vigenere-manual-autospacer").addEventListener("click", this.__shiftmanualautospacer__);
-		document.getElementById("vigenere-textarea-plaintext").addEventListener("input", this.__textareaPlaintext__);
-	},
+				// Swap the encipher / decipher boxes
+				var a = self.ele.decipherBox.nextElementSibling;
+				var b = self.ele.decipherBox.parentNode;
+				self.ele.encipherBox.replaceWith(self.ele.decipherBox);
+				b.insertBefore(self.ele.encipherBox, a);
 
-	__textareaCiphertext__: function (e) {
-		if (!Vigenere.manualMode) {
-			Vigenere._manualDecipher();
-			Vigenere._updateFreqCharts();
-			Vigenere._updateRepeated();
-		}
+			},
+			() => {
+				// Enable plaintext options
+				self.ele.ptOptions.style.display = "";
 
-		
-	},
+				// Swap the encipher / decipher boxes
+				var a = self.ele.decipherBox.nextElementSibling;
+				var b = self.ele.decipherBox.parentNode;
+				self.ele.encipherBox.replaceWith(self.ele.decipherBox);
+				b.insertBefore(self.ele.encipherBox, a);
+			},
+		);
 
-	__textareaPlaintext__: function (e) {
-		if (Vigenere.manualMode) {
-			Vigenere._manualEncipher();
-			Vigenere._updateFreqCharts();
-			Vigenere._updateRepeated();
-		}
+		this.ele.viewAnalysis.addEventListener("change", function (e) {
+			self.ele.analysisContainer.style.display = self.ele.viewAnalysis.checked ? "" : "none";
+		});
+
+		this.ele.textareaCiphertext.addEventListener("input", function (e) {
+			if (!self.cipherDirection.isEncipher) {
+				self._decipher();
+			}
+		});
+
+		this.ele.textareaPlaintext.addEventListener("input", function (e) {
+			if (self.cipherDirection.isEncipher) {
+				self._encipher();
+			}
+		});
+
+		this.ele.keyLength.addEventListener("input", function (e) {
+			self.keyLength = e.target.value;
+		});
+
+		this.ele.checkboxAutoSpaces.addEventListener("change", function (e) {
+			if (!self.cipherDirection.isEncipher) self._decipher();
+		});
+
+		this.ele.keySetCipherBtn.addEventListener("click", function (e) {
+			self.key = text_sanitize(self.ele.keyPhrase.value);
+			self.keyLength = self.key.length;
+			self.ele.keyLength.value = self.key.length;
+		});
 	},
 
 	__increaseLetter__: function (e) {
 		var index = parseInt(e.target.getAttribute("data-i"));
 
-		var currKey = Vigenere.key[index];
+		var currKey = VigenereCipher.key[index];
 		var nextKey = Alphabet[(26 + Alphabet.indexOf(currKey) + 1) % 26];
-		Vigenere.key = Vigenere.key.slice(0, index) + nextKey + Vigenere.key.slice(index + 1);
+		VigenereCipher.key = VigenereCipher.key.slice(0, index) + nextKey + VigenereCipher.key.slice(index + 1);
 		e.target.parentNode.parentNode.children[1].innerHTML = nextKey;
-		document.getElementById("vigenere-keyphrase-textfield").value = Vigenere.key;
+		VigenereCipher.ele.keyPhrase.value = VigenereCipher.key;
 
-		Vigenere.manualMode ? Vigenere._manualEncipher() : Vigenere._manualDecipher();
-		Vigenere._updateFreqCharts();
-		Vigenere._updateRepeated();
+		VigenereCipher.cipherDirection.isEncipher ? VigenereCipher._encipher() : VigenereCipher._decipher();
+		//VigenereCipher._updateFreqCharts();
+		//VigenereCipher._updateRepeated();
 	},
 
 	__decreaseLetter__: function (e) {
 		var index = parseInt(e.target.getAttribute("data-i"));
 
-		var currKey = Vigenere.key[index];
+		var currKey = VigenereCipher.key[index];
 		var nextKey = Alphabet[(26 + Alphabet.indexOf(currKey) - 1) % 26];
-		Vigenere.key = Vigenere.key.slice(0, index) + nextKey + Vigenere.key.slice(index + 1);
+		VigenereCipher.key = VigenereCipher.key.slice(0, index) + nextKey + VigenereCipher.key.slice(index + 1);
 		e.target.parentNode.parentNode.children[1].innerHTML = nextKey;
-		document.getElementById("vigenere-keyphrase-textfield").value = Vigenere.key;
+		VigenereCipher.ele.keyPhrase.value = VigenereCipher.key;
 
-		Vigenere.manualMode ? Vigenere._manualEncipher() : Vigenere._manualDecipher();
-		Vigenere._updateFreqCharts();
-		Vigenere._updateRepeated();
+		VigenereCipher.cipherDirection.isEncipher ? VigenereCipher._encipher() : VigenereCipher._decipher();
+		//VigenereCipher._updateFreqCharts();
+		//VigenereCipher._updateRepeated();
 	},
-
-	__keyLength__: function (e) {
-		e.target.value = e.target.value == "" || parseInt(e.target.value) < 1 ? 1 : parseInt(e.target.value) > 32 ? 32 : e.target.value; 
-		Vigenere._updateKeyLength();
-	},
-
-	__shiftmanualautospacer__: function (e) {
-		if (!Vigenere.manualMode) Vigenere._manualAutoSpacer();
-	},
-
-
 }
 
-
-
-Vigenere._init();
+VigenereCipher._init();

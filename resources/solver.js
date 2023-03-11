@@ -55,26 +55,7 @@ export const AutoSolver = {
 			return grid.join("");
 		},
 
-		// Create a key for the shift cipher given an A to some letter mapping
-		_getShiftKey: function (letter) {
-			// A -> letter
-			return Alphabet.substring(Alphabet.indexOf(letter)) + Alphabet.substring(0, Alphabet.indexOf(letter));
-		},
-
-		// Given a key phrase, strip repeated letters and extrapolate the rest of the alphabet.
-		_getFullKey: function (key) {
-			var shortedKey = text_sanitize(key).split("").filter((a, b, c) => c.indexOf(a) == b).join("");
-			return shortedKey + Alphabet.replace(new RegExp("[" + shortedKey + "]", "g"), "");;
-		},
-
-		_getKeyPhrase: function (key) {
-			var phrase = "";
-			while (phrase + Alphabet.replace(new RegExp("[" + phrase + "]", "g"), "") !== key) {
-				phrase += key[phrase.length];
-			}
-
-			return phrase;
-		},
+		
 		
 	},
 

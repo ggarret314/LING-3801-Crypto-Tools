@@ -1,11 +1,35 @@
+import { Alphabet, text_sanitize } from "./main.js";
+
 export const Cipher = {
 	mono: {
+		
+		// Create a key for the shift cipher given an A to some letter mapping
+		_getShiftKey: function (letter) {
+			// A -> letter
+			return Alphabet.substring(Alphabet.indexOf(letter)) + Alphabet.substring(0, Alphabet.indexOf(letter));
+		},
+
+		// Given a key phrase, strip repeated letters and extrapolate the rest of the alphabet.
+		_getFullKey: function (key) {
+			var shortedKey = text_sanitize(key).split("").filter((a, b, c) => c.indexOf(a) == b).join("");
+			return shortedKey + Alphabet.replace(new RegExp("[" + shortedKey + "]", "g"), "");;
+		},
+
+		_getKeyPhrase: function (key) {
+			var phrase = "";
+			while (phrase + Alphabet.replace(new RegExp("[" + phrase + "]", "g"), "") !== key) {
+				phrase += key[phrase.length];
+			}
+
+			return phrase;
+		},
+		
 		shift: {
 			// Encipher a plaintext with a substitution key.
 			_encipher: function (key, pt) {
 				var ct = "";
 				for (var i = 0; i < pt.length; i++) {
-					ct += this.fullKey[Alphabet.indexOf(pt[i])];
+					ct += key[Alphabet.indexOf(pt[i])];
 				}
 
 				return ct;
@@ -13,22 +37,27 @@ export const Cipher = {
 
 			// Decipher a ciphertext with a substitution key.
 			// If a particular letter is not found in the key, it is substituted with a period.
+			// An array with the periods and original cipher letters will be returned.
 			_decipher: function(key, ct) {
 				var pt = "";
+				var ptCt = "";
 				for (var i = 0; i < ct.length; i++) {
 					var a = key.indexOf(ct[i]);
 					pt += a == -1 ? '.' : Alphabet[a];
+					ptCt += a == -1 ? ct[i] : Alphabet[a];
 				}
 
-				return pt;
+				return [pt, ptCt];
 			},
 		},
+		
 		substitution: {
 			// Encipher a plaintext with a substitution key.
 			_encipher: function (key, pt) {
 				var ct = "";
 				for (var i = 0; i < pt.length; i++) {
-					ct += this.fullKey[Alphabet.indexOf(pt[i])];
+					var a = Alphabet.indexOf(pt[i])
+					ct += key[a] ? key[a] : ".";
 				}
 
 				return ct;
@@ -36,14 +65,17 @@ export const Cipher = {
 
 			// Decipher a ciphertext with a substitution key.
 			// If a particular letter is not found in the key, it is substituted with a period.
+			// An array with the periods and original cipher letters will be returned.
 			_decipher: function(key, ct) {
 				var pt = "";
+				var ptCt = "";
 				for (var i = 0; i < ct.length; i++) {
 					var a = key.indexOf(ct[i]);
 					pt += a == -1 ? '.' : Alphabet[a];
+					ptCt += a == -1 ? ct[i] : Alphabet[a];
 				}
 
-				return pt;
+				return [pt, ptCt];
 			},
 		},
 	},

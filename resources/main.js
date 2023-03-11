@@ -1,3 +1,6 @@
+import { Quadgrams } from './quadgrams.js';
+import { Words } from './words.js';
+
 // Everything here was written by Garret Gallion
 
 
@@ -32,36 +35,6 @@ var rd = "";
 if (typeof __ROOTDIR__ !== "undefined") {
 	rd = __ROOTDIR__;
 }
-_get(rd + 'resources/top100000words.txt', (data) => {
-	topWords = data.replace(/\r/g, "").split("\n");
-	WordFinder._init();
-});
-
-
-_get(rd + 'resources/english_quadgrams.txt', data => {
-	// english_quadgrams.txt is from http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams
-	var x = data.replace(/\r/g, "").split("\n");
-	for (var i = 0; i < x.length; i++) {
-		var p = x[i].split(" ");
-		quadgrams.push(p[0]);
-		quadgramFitness.push(parseInt(p[1]));
-		
-	}
-
-
-	// find total number of quadrigrams.
-	var sum = quadgramFitness.reduce((a, b) => a + b, 0);
-	
-
-	// Calculate fitness of each quadrigram
-	for (var i = 0; i < quadgramFitness.length; i++) {
-		quadgramFitness[i] = Math.log(quadgramFitness[i]/sum);
-	}
-
-
-
-	TextFitness._init(sum);
-});
 
 
 // PageSwitcher: switches between pages for the different parts of the site. 
@@ -70,8 +43,8 @@ _get(rd + 'resources/english_quadgrams.txt', data => {
 //             based off of https://stackoverflow.com/questions/8870261
 export var WordFinder = {
 	words: null,
-	wordCosts: {},
-	maxWordLength: 0,
+	wordCosts: Words,
+	maxWordLength: 58,
 	
 	_wordFind: function (str) {
 		var costs = [0];
@@ -148,15 +121,6 @@ export var WordFinder = {
 
 	singleWordFind: function (str) {
 
-	},
-
-	_init: function () {
-		this.words = topWords;
-		
-		for (var i = 0; i < this.words.length; i++) {
-			this.wordCosts[this.words[i]] = Math.log((i + 1) * Math.log(this.words.length));
-			if (this.words[i].length > this.maxWordLength) this.maxWordLength = this.words[i].length;
-		}
 	}
 }
 
@@ -195,13 +159,6 @@ export var TextFitness = {
 		}
 
 		return x;
-	},
-
-	_init: function (sum) {
-		this.sum = sum;
-		this.floor = -1 * Math.log(0.01 / this.sum);
-		this.quadgrams = quadgrams;
-		this.fitness = quadgramFitness;
 	}
 }
 

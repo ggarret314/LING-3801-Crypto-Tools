@@ -1,4 +1,379 @@
-// MonoalphabeticCipher: holds the code for solving monoalphabetic ciphers.
+import { Alphabet, text_sanitize, WordFinder, EnglishFrequencies } from '../main.js';
+import { Cipher } from '../cipher.js';
+import { CipherDirection } from '../cipherdirection.js';
+
+
+class FrequencyTable {
+	constructor(container, options) {
+		// options: array of 1,2,3, or 4, or all, or some for uni bi tri and quadri grams
+		this.frequencyTableElement = container;
+		this.frequencyTable = {
+			letterRegularElements: [],
+			letterCipherElements: [],
+			bigramRegularElements: [],
+			bigramCipherElements: [],
+			trigramRegularElements: [],
+			trigramCipherElements: [],
+			quadrigramRegularElements: [],
+			quadrigramCipherElements: [],
+		};
+
+		this._initFrequencyTable();
+	}
+
+	_initFrequencyTable () {
+		// Find total number of rows required.
+		var totalRows = 0;
+		for (var freq in EnglishFrequencies) {
+			if (EnglishFrequencies[freq].length > totalRows) totalRows = EnglishFrequencies[freq].length;
+		}
+
+		// Create the rows
+		var rows = [];
+		for (var i = 0; i < totalRows; i++) {
+			rows.push(document.createElement("tr"));
+		}
+
+		// Determine number of each thing
+		var EngFreqTitles = ["freqLetters", "freqBigrams", "freqTrigrams", "freqQuadrigrams"];
+		var EleTitles = [["letterRegularElements","letterCipherElements"], ["bigramRegularElements","bigramCipherElements"], 
+						 ["trigramRegularElements","trigramCipherElements"], ["quadrigramRegularElements","quadrigramCipherElements"]];
+		for (var i = 0; i < EngFreqTitles.length; i++) {
+			var theFreq = EnglishFrequencies[EngFreqTitles[i]];
+			for (var j = 0; j < theFreq.length; j++) {
+				// create two regular and two cipher columns for each thing
+				var p1 = document.createElement("td");
+				var p2 = document.createElement("td");
+				var c1 = document.createElement("td");
+				var c2 = document.createElement("td");
+
+				// fill regular columns with appropriate data
+				p1.innerHTML = theFreq[j][0];
+				p2.innerHTML = theFreq[j][1].toFixed(1) + "%";
+
+				// add the columns in frequencyTable object
+				this.frequencyTable[EleTitles[i][0]].push([p1, p2]);
+				this.frequencyTable[EleTitles[i][1]].push([c1, c2]);
+
+				// add the columns to the jth row
+				rows[j].append(p1);
+				rows[j].append(p2);
+				rows[j].append(c1);
+				rows[j].append(c2);
+			}
+		}
+
+		// add rows to table
+		for (var i = 0; i < rows.length; i++) {
+			this.frequencyTableElement.children[1].append(rows[i]);
+		}
+
+	}
+
+
+
+	_updateFrequencyTable(ct) {
+
+		// Calculate the number of each letter, bigram, etc.
+		var letterTotal = 0, bigramTotal = 0, trigramTotal = 0, quadrigramTotal = 0;
+		var letters = {}, bigrams = {}, trigrams = {}, quadrigrams = {};
+		var sortedletters = [], sortedbigrams = [], sortedtrigrams = [], sortedquadrigrams = [];
+		for (var i = 0; i < ct.length; i++) {
+			// letter
+			if (!(ct[i] in letters)) letters[ct[i]] = 1;
+			else letters[ct[i]]++;
+			letterTotal++;
+			// bigram
+			if (i + 1 < ct.length) {
+				if (!(ct.substring(i, i + 2) in bigrams)) bigrams[ct.substring(i, i + 2)] = 1;
+				else bigrams[ct.substring(i, i + 2)]++;
+				bigramTotal++;
+			}
+
+			// trigram
+			if (i + 1 < ct.length) {
+				if (!(ct.substring(i, i + 3) in trigrams)) trigrams[ct.substring(i, i + 3)] = 1;
+				else trigrams[ct.substring(i, i + 3)]++;
+				trigramTotal++;
+			}
+
+			// quadrigram
+			if (i + 1 < ct.length) {
+				if (!(ct.substring(i, i + 4) in quadrigrams)) quadrigrams[ct.substring(i, i + 4)] = 1;
+				else quadrigrams[ct.substring(i, i + 4)]++;
+				quadrigramTotal++;
+			}
+		}
+
+		// sort them
+
+		for (var letter in letters) {
+			sortedletters.push([letter, letters[letter]]);
+		}
+
+		for (var bigram in bigrams) {
+			sortedbigrams.push([bigram, bigrams[bigram]]);
+		}
+
+		for (var trigram in trigrams) {
+			sortedtrigrams.push([trigram, trigrams[trigram]]);
+		}
+
+		for (var quadrigram in quadrigrams) {
+			sortedquadrigrams.push([quadrigram, quadrigrams[quadrigram]]);
+		}
+		
+		sortedletters.sort((a, b) => b[1] - a[1]);
+		sortedbigrams.sort((a, b) => b[1] - a[1]);
+		sortedtrigrams.sort((a, b) => b[1] - a[1]);
+		sortedquadrigrams.sort((a, b) => b[1] - a[1]);
+
+		// calculate relative frequencies.
+		if (sortedletters.length > 0 && sortedbigrams.length > 0 && sortedtrigrams.length > 0 && sortedquadrigrams.length > 0) {
+			var topLetterCount = sortedletters[0][1], topBigramCount = sortedbigrams[0][1], topTrigramCount = sortedtrigrams[0][1], topQuadrigramCount = sortedquadrigrams[0][1];
+			sortedletters.forEach(x => x[1] = (100 * x[1] / topLetterCount).toFixed(1) + "%");
+			sortedbigrams.forEach(x => x[1] = (100 * x[1] / topBigramCount).toFixed(1) + "%");
+			sortedtrigrams.forEach(x => x[1] = (100 * x[1] / topTrigramCount).toFixed(1) + "%");
+			sortedquadrigrams.forEach(x => x[1] = (100 * x[1] / topQuadrigramCount).toFixed(1) + "%");
+	
+	
+			// print them out on the table
+	
+			for (var i = 0; i < this.frequencyTable.letterCipherElements.length && i < sortedletters.length; i++) {
+				var currElements = this.frequencyTable.letterCipherElements[i];
+				currElements[0].innerHTML = sortedletters[i][0];
+				currElements[1].innerHTML = sortedletters[i][1];
+				
+			}
+	
+			for (var i = 0; i < this.frequencyTable.bigramCipherElements.length && i < sortedbigrams.length; i++) {
+				var currElements = this.frequencyTable.bigramCipherElements[i];
+				currElements[0].innerHTML = sortedbigrams[i][0];
+				currElements[1].innerHTML = sortedbigrams[i][1];
+				
+			}
+	
+			for (var i = 0; i < this.frequencyTable.trigramCipherElements.length && i < sortedtrigrams.length; i++) {
+				var currElements = this.frequencyTable.trigramCipherElements[i];
+				currElements[0].innerHTML = sortedtrigrams[i][0];
+				currElements[1].innerHTML = sortedtrigrams[i][1];
+				
+			}
+	
+			for (var i = 0; i < this.frequencyTable.quadrigramCipherElements.length && i < sortedquadrigrams.length; i++) {
+				var currElements = this.frequencyTable.quadrigramCipherElements[i];
+				currElements[0].innerHTML = sortedquadrigrams[i][0];
+				currElements[1].innerHTML = sortedquadrigrams[i][1];
+				
+			}	
+		}
+		
+
+	}
+}
+
+class DecipheringContainer {
+	constructor(container) {
+		this.container = container;
+	}
+
+	_update(ct, pt, grouping=1) {
+		this.container.innerHTML = "";
+		
+		for (var i = 0; i < ct.length; i += grouping) {
+			var a = document.createElement("div"),
+				b = document.createElement("div"),
+				c = document.createElement("div");
+			
+			a.setAttribute("class", "deciphering-block");
+			b.setAttribute("class", "cipher-row");
+			c.setAttribute("class", "plain-row");
+
+			a.innerHTML = ct.substring(i, i + grouping);
+			b.innerHTML = pt.substring(i, i + grouping);
+
+			a.appendChild(b);
+			a.appendChild(c);
+
+			this.container.appendChild(a);
+		}
+	}
+}
+
+// This file contains all of the code needed to do
+// Cryptanalysis for the Substitution cipher
+
+const SubstitutionCipher = {
+	
+	ele: {
+		decipherBox: 		document.getElementById("decipher-box"),
+		encipherBox: 		document.getElementById("encipher-box"),
+		ptOptions:			document.getElementById("plaintext-options"),
+		textareaCiphertext: document.getElementById("textarea-ciphertext"),
+		textareaPlaintext:  document.getElementById("textarea-plaintext"),
+		keyPhrase: document.getElementById("key-phrase"),
+		keySetCipherBtn: document.getElementById("key-set-cipher-btn"),
+		keyClearBtn: document.getElementById("key-clear-btn"),
+		keyCt: document.getElementById("key-ct"),
+		keyLettersContainer: document.getElementById("key-letters"),
+		keyLetters: [],
+		frequencyTable: document.getElementById("frequency-table"),
+		viewAnalysis: document.getElementById("view-analysis"),
+		analysisContainer: document.getElementById("analysis-container"),
+		checkboxAutoSpaces: document.getElementById("auto-spaces"),
+	},
+
+	frequencyTable: null,
+	cipherDirection: null,
+	decipheringContainer: null,
+
+	__cipherAlphabet: "..........................",
+	get cipherAlphabet() { return this.__cipherAlphabet },
+	set cipherAlphabet(s) {
+		this.__cipherAlphabet = s;
+		if (this.cipherDirection.isEncipher) this._encipher();
+		else this._decipher();
+	},
+
+	_decipher: function () {
+		var key = this.cipherAlphabet,
+			ct  = text_sanitize(this.ele.textareaCiphertext.value),
+			pt  = Cipher.mono.substitution._decipher(key, ct);
+		
+		this.frequencyTable._updateFrequencyTable(ct);
+		this.decipheringContainer._update(ct, pt[0].toLowerCase());
+		this.ele.textareaPlaintext.value = (this.ele.checkboxAutoSpaces.checked ? WordFinder._wordFind(pt[1]) : pt[1]).toLowerCase();
+	},
+
+	_encipher: function () {
+		var key = this.cipherAlphabet,
+			pt  = text_sanitize(this.ele.textareaPlaintext.value),
+			ct  = Cipher.mono.substitution._encipher(key, pt);
+		
+			this.frequencyTable._updateFrequencyTable(ct);
+			this.decipheringContainer._update(ct, pt[0].toLowerCase());
+			this.ele.textareaCiphertext.value = ct;
+	},
+
+	_updateDecipheringBlock: function () {
+
+	},
+
+	_initAlphabet: function () {
+		for (var i = 0; i < Alphabet.length; i++) {
+			var a = document.createElement("div"),
+				b = document.createElement("div"),
+				c = document.createElement("div"),
+				d = document.createElement("input");
+
+			a.setAttribute("class", "key-letter-container2");
+			b.innerHTML = Alphabet[i];
+			d.setAttribute("class", "key-letter-input2");
+			d.setAttribute("type", "text");
+			d.setAttribute("data-i", i);
+			
+			c.appendChild(d);
+			a.appendChild(b);
+			a.appendChild(c);
+
+			this.ele.keyLetters.push(d);
+
+			this.ele.keyLettersContainer.appendChild(a);
+		}
+	},
+
+	_init: function () {
+		var self = this;
+
+		
+		this._initAlphabet();
+
+		this.frequencyTable = new FrequencyTable(this.ele.frequencyTable, [1, 2, 3, 4]);
+		this.cipherDirection = new CipherDirection(
+			document.getElementById("control-encipher"),
+			document.getElementById("control-decipher"),
+			() => {
+				// Disable plaintext options
+				self.ele.ptOptions.style.display = "none";
+
+				// Swap the encipher / decipher boxes
+				var a = self.ele.decipherBox.nextElementSibling;
+				var b = self.ele.decipherBox.parentNode;
+				self.ele.encipherBox.replaceWith(self.ele.decipherBox);
+				b.insertBefore(self.ele.encipherBox, a);
+
+			},
+			() => {
+				// Enable plaintext options
+				self.ele.ptOptions.style.display = "";
+
+				// Swap the encipher / decipher boxes
+				var a = self.ele.decipherBox.nextElementSibling;
+				var b = self.ele.decipherBox.parentNode;
+				self.ele.encipherBox.replaceWith(self.ele.decipherBox);
+				b.insertBefore(self.ele.encipherBox, a);
+			},
+		);
+		
+		this.decipheringContainer = new DecipheringContainer(document.getElementById("deciphering-container"));
+
+		this.ele.keySetCipherBtn.addEventListener("click", function (e) {
+			self.cipherAlphabet = Cipher.mono._getFullKey(self.ele.keyPhrase.value);
+			
+			self.ele.keyCt.innerHTML = self.cipherAlphabet;
+
+			for (var i = 0; i < Alphabet.length; i++) {
+				self.ele.keyLetters[i].value = self.cipherAlphabet[i];
+			}
+
+		});
+
+		this.ele.keyClearBtn.addEventListener("click", function (e) {
+
+			self.cipherAlphabet = "..........................";
+			self.ele.keyCt.innerHTML = self.cipherAlphabet;
+
+			for (var i = 0; i < Alphabet.length; i++) {
+				self.ele.keyLetters[i].value = "";
+			}
+		});
+
+		for (var i = 0; i < Alphabet.length; i++) {
+			
+			this.ele.keyLetters[i].addEventListener("input", function (e) {
+				e.target.value = e.target.value.length == 0 ? "" : text_sanitize(e.target.value[e.target.value.length - 1]);
+				var j = parseInt(e.target.getAttribute("data-i"));
+				self.cipherAlphabet = 
+					self.cipherAlphabet.substring(0, j) + 
+					(e.target.value == "" ? "." : e.target.value) + 
+					self.cipherAlphabet.substring(j + 1);
+				self.ele.keyCt.innerHTML = self.cipherAlphabet;
+			});
+
+		}
+		
+		this.ele.viewAnalysis.addEventListener("change", function (e) {
+			self.ele.analysisContainer.style.display = self.ele.viewAnalysis.checked ? "" : "none";
+		});
+
+		this.ele.textareaCiphertext.addEventListener("input", function (e) {
+			if (!self.cipherDirection.isEncipher) self._decipher();
+		});
+
+		this.ele.textareaPlaintext.addEventListener("input", function (e) {
+			if (self.cipherDirection.isEncipher) self._encipher();
+		});
+
+		this.ele.checkboxAutoSpaces.addEventListener("change", function (e) {
+			if (!self.cipherDirection.isEncipher) self._decipher();
+		});
+	}
+}
+
+
+SubstitutionCipher._init();
+
+/*
 var MonoalphabeticCipher = {
 
 	get keyPhrase() { return this.keyPhraseTextfieldElement.value },
@@ -391,3 +766,5 @@ decipher(
 );
 
 MonoalphabeticCipher._init();
+
+*/

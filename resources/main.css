@@ -101,9 +101,6 @@ header nav .nav-item:hover {
 	padding-bottom: 5px;
 }
 
-.alphabet-container {
-
-}
 
 .alphabet-container .alphabet-letter:first-child {
 	border-left: 1px solid black;
@@ -124,8 +121,6 @@ header nav .nav-item:hover {
 	padding: 15px 0 5px 0;
 }
 
-.alphabet-plaintext {
-}
 
 .alphabet-plaintext .alphabet-letter {
 	background: #caebff;
@@ -143,10 +138,6 @@ header nav .nav-item:hover {
 
 #page-shift-key-container {
 	padding: 10px 0 0 0;
-}
-
-.textarea-container {
-
 }
 
 .monospace {
@@ -169,7 +160,7 @@ header nav .nav-item:hover {
 }
 
 .frequency-table {
-	width: 998px;
+	width: 980px;
 	border: 1px solid black;
 	table-layout: fixed;
 	border-collapse: collapse;
@@ -390,7 +381,7 @@ a.f {
 	padding: 5px 0;
 }
 
-#playfair-deciphering-container {
+#deciphering-container {
 	font-family: monospace;
 	font-size: 15px;
 	padding-bottom: 10px;
@@ -398,8 +389,12 @@ a.f {
 
 .deciphering-block {
 	display: inline-block;
-	padding-right: 5px;
-	padding-bottom: 10px;
+	margin: 10px 2px;
+}
+
+.separate {
+	margin-left: 4px;
+	margin-right: 4px;
 }
 
 .plain-row {
@@ -425,8 +420,6 @@ a.f {
 	width: 30px;
 }
 
-.playfair-crib-top {
-}
 
 .playfair-crib-bigram {
 	display: inline-block;
@@ -489,4 +482,54 @@ a.f {
 
 h3 {
 	margin: 5px 0;
+}
+
+.key-letter-container2 {
+	margin: 5px 2px;
+	text-align: center;
+	display: inline-block;
+}
+
+.key-letter-container2 > div {
+	width: 25px;
+	height: 25px;
+	font-size: 19px;
+	line-height: 25px;
+}
+
+.key-letter-input2 {
+	box-sizing: border-box;
+	width: 25px;
+	height: 25px;
+	padding: 0;
+	font-size: 19px;
+	line-height: 25px;
+	text-align: center;
+}
+
+.repeated-table {
+	border-collapse: collapse;
+	width: 980px;
+}
+
+.repeated-table-container {
+	width: 100%;
+	overflow-x: scroll;
+}
+
+.repeated-table td,
+.repeated-table th {
+	width: 30px;
+	box-sizing: border-box;
+}
+
+.small-btn {
+	box-sizing: border-box;
+	height: 15px;
+	width: 15px;
+	font-family: monospace;
+	font-size: 12px;
+	line-height: 15px;
+	padding: 0;
+	margin: 0;
 }
