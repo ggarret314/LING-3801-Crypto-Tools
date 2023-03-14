@@ -1,4 +1,269 @@
-// Playfair: holds the code for playfair cipher
+import { Alphabet, text_sanitize, WordFinder, EnglishFrequencies } from '../main.js';
+import { Cipher } from '../cipher.js';
+import { CipherDirection } from '../cipherdirection.js';
+import { FrequencyTable } from '../frequencytable.js';
+import { DecipheringContainer } from '../decipheringcontainer.js';
+
+// PlayfairCipher: holds the code for playfair cipher
+const PlayfairCipher = {
+
+	ele: {
+		decipherBox: 		document.getElementById("decipher-box"),
+		encipherBox: 		document.getElementById("encipher-box"),
+		ptOptions:			document.getElementById("plaintext-options"),
+		textareaCiphertext: document.getElementById("textarea-ciphertext"),
+		textareaPlaintext:  document.getElementById("textarea-plaintext"),
+		keyPhrase: document.getElementById("key-phrase"),
+		keySetCipherBtn: document.getElementById("key-set-cipher-btn"),
+		keyClearBtn: document.getElementById("key-clear-btn"),
+		keyCt: document.getElementById("key-ct"),
+		keyLettersContainer: document.getElementById("key-letters"),
+		keyLetters: [],
+		keyLength: document.getElementById("key-length"),
+		frequencyTable: document.getElementById("frequency-table"),
+		viewAnalysis: document.getElementById("view-analysis"),
+		analysisContainer: document.getElementById("analysis-container"),
+		checkboxAutoSpaces: document.getElementById("auto-spaces"),
+		repeatedHeaders: document.getElementById("repeated-headers"),
+		repeatedContents: document.getElementById("repeated-contents"),
+		frequencyCharts: document.getElementById("frequency-charts"),
+		gridElement: document.getElementById("playfair-grid"),
+		btnSetKey: document.getElementById("key-set-btn"),
+		keyRaw: document.getElementById("key-raw"),
+	},
+
+	cipherDirection: null,
+	frequencyTable: null,
+	decipheringContainer: null,
+
+	grid: [
+		'', '', '', '', '',
+		'', '', '', '', '',
+		'', '', '', '', '',
+		'', '', '', '', '',
+		'', '', '', '', ''
+	],
+
+	cribs: [
+
+	],
+
+	swappingRow: -1,
+	swappingColumn: -1,
+
+	_decipher: function () {
+		var key = this.grid,
+			ct  = text_sanitize(this.ele.textareaCiphertext.value),
+			pt  = Cipher.digraph.playfair._decipher(key, ct);
+
+		this.frequencyTable._updateFrequencyTable(ct);
+		this.decipheringContainer._update(ct, pt.toLowerCase(), 2);
+		this.ele.textareaPlaintext.value = (this.ele.checkboxAutoSpaces.checked ? WordFinder._wordFind(pt) : pt).toLowerCase();
+	},
+
+	_encipher: function () {
+		var key = this.grid,
+			pt  = text_sanitize(this.ele.textareaPlaintext.value),
+			ct  = Cipher.digraph.playfair._encipher(key, pt);
+	
+		this.frequencyTable._updateFrequencyTable(ct);
+		this.decipheringContainer._update(ct, pt.toLowerCase());
+		this.ele.textareaCiphertext.value = ct;
+	},
+
+	_updateGrid: function () {
+		for (var i = 0; i < 25; i++) {
+			document.getElementsByClassName("playfair-grid-letter-input")[i].value = this.grid[i];
+		}
+		if (!this.decipheringContainer.isEncipher) this._decipher();
+		else this._encipher();
+	},
+
+	_initGrid: function () {
+		var self = this;
+		this.ele.gridElement.innerHTML = "";
+		for (var i = 0; i < 5; i++) {
+			var row = document.createElement("div");
+			row.setAttribute("class", "playfair-grid-row");
+			for (var j = 0; j < 5; j++) {
+				var letter = document.createElement("div");
+				letter.setAttribute("class", "playfair-grid-letter");
+				var input = document.createElement("input");
+				input.setAttribute("class", "playfair-grid-letter-input");
+				input.setAttribute("type", "text");
+				input.setAttribute("data-i", i * 5 + j);
+				input.value = this.grid[i * 5 + j];
+				input.addEventListener("input", function (e) {
+					if (e.target.value.length > 0) e.target.value = text_sanitize(e.target.value[e.target.value.length - 1]);
+					if (e.target.value == "J" || self.grid.indexOf(e.target.value) !== -1) e.target.value = "";
+					self.grid[e.target.getAttribute("data-i")] = e.target.value;
+					if (!self.manualMode) self._decipher();
+					else self._encipher();
+				});
+				this.ele.keyLetters.push(input);
+				letter.appendChild(input);
+				row.appendChild(letter);
+			}
+			
+			var controlMover = document.createElement("div");
+			controlMover.setAttribute("class", "playfair-grid-mover");
+			controlMover.setAttribute("data-row", i);
+			controlMover.setAttribute("id", "playfair-moverow-" + i);
+			controlMover.addEventListener("click", function (e) {
+				if (self.swappingRow == -1) {
+					e.target.style.backgroundColor = "orange";
+					self.swappingRow = parseInt(e.target.getAttribute("data-row"));
+				} else {
+					var row1Index = parseInt(e.target.getAttribute("data-row"));
+					var row1 = self.grid.slice(row1Index * 5, row1Index * 5 + 5);
+					var row2 = self.grid.slice(self.swappingRow * 5, self.swappingRow * 5 + 5);
+
+					for (var k = 0; k < 5; k++) {
+						self.grid[self.swappingRow * 5 + k] = row1[k];
+						self.grid[row1Index * 5 + k] = row2[k];
+					}
+
+					document.getElementById("playfair-moverow-" + self.swappingRow).style.backgroundColor = "";
+					self.swappingRow = -1;
+					self._updateGrid();
+
+				}
+			});
+			controlMover.innerHTML = "s";
+
+			row.appendChild(controlMover);
+
+			var controlPusher = document.createElement("div");
+			controlPusher.setAttribute("class", "playfair-grid-mover");
+			controlPusher.setAttribute("data-row", i);
+			controlPusher.innerHTML = "&gt;";
+			controlPusher.addEventListener("click", function (e) {
+				var row = parseInt(e.target.getAttribute("data-row"));
+				var letter = self.grid[row * 5 + 4];
+				for (var k = 4; k > 0; k--) {
+					self.grid[row * 5 + k] = self.grid[row * 5 + k - 1];
+				}
+				self.grid[row * 5] = letter;
+				self._updateGrid();
+
+			});
+			row.appendChild(controlPusher);
+
+			this.ele.gridElement.appendChild(row);
+			
+			
+		}
+
+		var controlMoverRow = document.createElement("div");
+		controlMoverRow.setAttribute("class", "playfair-grid-mover-row");
+		for (var j = 0; j < 5; j++) {
+			var controlMover = document.createElement("div");
+			controlMover.setAttribute("class", "playfair-grid-mover");
+			controlMover.innerHTML = "s";
+			controlMover.setAttribute("data-col", j);
+			controlMover.setAttribute("id", "playfair-movecol-" + j);
+			
+			controlMover.addEventListener("click", function (e) {
+				if (self.swappingColumn == -1) {
+					e.target.style.backgroundColor = "orange";
+					self.swappingColumn = parseInt(e.target.getAttribute("data-col"));
+				} else {
+					var col1Index = parseInt(e.target.getAttribute("data-col"));
+					for (var k = 0; k < 5; k++) {
+						var letter = self.grid[col1Index + k * 5]
+						self.grid[col1Index + k * 5] = self.grid[self.swappingColumn + k * 5];
+						self.grid[self.swappingColumn + k * 5] = letter;
+					}
+
+
+					document.getElementById("playfair-movecol-" + self.swappingColumn).style.backgroundColor = "";
+					self.swappingColumn = -1;
+					self._updateGrid();
+
+				}
+			});
+			controlMoverRow.appendChild(controlMover);
+		}
+
+		var controlPusherRow = document.createElement("div");
+		controlPusherRow.setAttribute("class", "playfair-grid-mover-row");
+		for (var j = 0; j < 5; j++) {
+			var controlMover = document.createElement("div");
+			controlMover.innerHTML = "v";
+			controlMover.setAttribute("class", "playfair-grid-mover");
+			controlMover.setAttribute("data-col", j);
+			controlMover.addEventListener("click", function (e) {
+				var col = parseInt(e.target.getAttribute("data-col"));
+				var letter = self.grid[col + 20];
+				for (var k = 4; k > 0; k--) {
+					self.grid[k * 5 + col] = self.grid[(k - 1) * 5 + col];
+				}
+				self.grid[col] = letter;
+				self._updateGrid();
+
+			});
+			controlPusherRow.appendChild(controlMover);
+		}
+		
+		this.ele.gridElement.appendChild(controlMoverRow);
+		this.ele.gridElement.appendChild(controlPusherRow);
+	},
+
+	_init: function () {
+		var self = this;
+
+		this.cipherDirection = new CipherDirection(
+			document.getElementById("control-encipher"),
+			document.getElementById("control-decipher"),
+			() => console.log("enciphering"),
+			() => console.log("deciphering")
+		);
+
+		this.frequencyTable = new FrequencyTable(this.ele.frequencyTable, [2]);
+
+		this.decipheringContainer = new DecipheringContainer(document.getElementById("deciphering-container"));
+
+		this._initGrid();
+
+		this.ele.textareaCiphertext.addEventListener("input", function (e) {
+			if (!self.cipherDirection.isEncipher) self._decipher();
+		});
+
+		this.ele.textareaPlaintext.addEventListener("input", function (e) {
+			if (self.cipherDirection.isEncipher) self._encipher();
+		});
+
+		this.ele.checkboxAutoSpaces.addEventListener("change", function (e) {
+			if (!self.cipherDirection.isEncipher) self._decipher();
+		});
+
+		this.ele.btnSetKey.addEventListener("click", function (e) {
+			self.grid = Cipher.mono._getFullKey(self.ele.keyPhrase.value).replace('J', '').split('');
+			self.ele.keyRaw.value = text_sanitize(self.ele.keyPhrase.value)
+				.replace('J', '')
+				.split('')
+				.filter((a, b, c) => c.indexOf(a) == b)
+				.join('');
+
+			for (var i = 0; i < Alphabet.length - 1; i++) {
+				
+				self.ele.keyLetters[i].value = self.grid[i];
+			}
+
+			if (self.cipherDirection.isEncipher) self._encipher();
+			else self._decipher();
+
+		});
+
+		this.ele.viewAnalysis.addEventListener("change", function (e) {
+			self.ele.analysisContainer.style.display = self.ele.viewAnalysis.checked ? "" : "none";
+		});
+	},
+}
+
+PlayfairCipher._init();
+
+
 var Playfair = {
 
 	get keyPhrase() { return document.getElementById("playfair-keyphrase-textfield").value },
@@ -114,320 +379,6 @@ var Playfair = {
 
 		// display crib
 		this._addCribElement(this.cribs.length - 1);
-	},
-
-	_autoDecipher: function (key, ct = this.manualCiphertextElement.value) {
-		// Note: ct must already be sanitized!
-
-		var pt = "";
-		
-
-		for (var i = 0; i < ct.length; i += 2) {
-			var letter1 = ct[i], letter2 = ct[i + 1];
-			var letter1Index = key.indexOf(letter1);
-			var letter2Index = key.indexOf(letter2);
-			
-			if (letter1Index !== -1 && letter2Index !== -1) {
-				if (letter1Index % 5 == letter2Index % 5) {
-					// same column
-					letter1Index = (25 + letter1Index - 5) % 25;
-					letter2Index = (25 + letter2Index - 5) % 25;
-				} else if (Math.floor(letter1Index / 5) == Math.floor(letter2Index / 5)) {
-					// same row
-					letter1Index = (5 + letter1Index - 1) % 5 + 5 * Math.floor(letter1Index / 5);
-					letter2Index = (5 + letter2Index - 1) % 5 + 5 * Math.floor(letter2Index / 5);
-				} else {
-					// box rule
-					var diff = letter2Index % 5 - letter1Index % 5;
-					letter1Index += diff;
-					letter2Index -= diff;
-				}
-				letter1 = key[letter1Index]; letter2 = key[letter2Index];
-				letter1 = letter1 == "" ? "." : letter1;
-				letter2 = letter2 == "" ? "." : letter2;
-				pt += letter1 + letter2;
-			} else {
-				pt += "..";
-			}
-		}
-
-		
-
-		//this.manualPlaintextElement.value = pt;
-		return pt;
-		
-	},
-	_autoSolver: function () {
-		
-		if (Playfair.autoSolverType) {
-			Playfair._autoSolveVisualizer(Playfair.keyPhrase, text_sanitize(Playfair.manualCiphertextElement.value), 20, 0.2, 50000);
-		} else {
-			Playfair._autoSolve(Playfair.keyPhrase, text_sanitize(Playfair.manualCiphertextElement.value), 20, 0.2, 50000);
-			document.getElementById("playfair-bestkey").innerHTML = maxKey + " (" + maxFitness + ")";
-			document.getElementById("playfair-bestkey").innerHTML = maxKey + " (" + maxFitness + ")";
-			this._updateGridWithKey(maxKey);
-			this._manualDecipher();
-			this._manualAutoSpacer();
-		}
-		
-
-	},
-	_autoSolve: function(startKeyPhrase = "", ct, Temp = 20, Step = 0.2, Count = 50000) {
-		var self = this;
-		var newAlphabet = Alphabet.substring(0, 9) + Alphabet.substring(10);
-		startKeyPhrase = self._noRepeats(startKeyPhrase);
-		
-		for (var i = 0; i < 25; i++) {
-			if (startKeyPhrase.indexOf(newAlphabet[i]) == -1) startKeyPhrase += newAlphabet[i];
-		}
-		
-		var pt = self._decipher(startKeyPhrase, ct);
-
-		var bestFitness = TextFitness._calcFitness(pt);
-		var maxFitness = bestFitness;
-		var maxKey = startKeyPhrase;
-		var bestKey = maxKey;
-
-		for (var temp = Temp; temp >= 0; temp -= Step) { 
-			for (var count = 0; count < Count; count++) {
-				var newKey = self._changeKey(maxKey);
-				pt = self._decipher(newKey, ct);
-				var newFitness = TextFitness._calcFitness(pt);
-				var dF = newFitness - maxFitness;
-				if (dF >= 0) {
-					maxFitness = newFitness;
-					maxKey = newKey;
-				} else if (temp > 0) {
-					if (Math.exp(dF/temp) > Math.random()) {
-						maxFitness = newFitness;
-						maxKey = newKey;
-					}
-				}
-				if (maxFitness > bestFitness) {
-					
-					bestFitness = maxFitness;
-					bestKey = maxKey;
-					console.log(bestKey, bestFitness);
-				}
-			}
-			console.log((100 * (Temp - temp) / Temp).toFixed(0) + "% complete");
-		}
-
-		
-	}, 
-
-	_autoSolveVisualizer: function(startKeyPhrase = "", ct, Temp = 20, Step = 0.2, Count = 50000, saved=[null, null]) {
-		var newAlphabet = Alphabet.substring(0, 9) + Alphabet.substring(10);
-		startKeyPhrase 	= this._noRepeats(startKeyPhrase);
-		for (var i = 0; i < 25; i++) {
-			if (startKeyPhrase.indexOf(newAlphabet[i]) == -1) startKeyPhrase += newAlphabet[i];
-		}
-
-		var pt 			= this._decipher(startKeyPhrase, ct),
-			bestFitness = TextFitness._calcFitness(pt),
-			maxFitness 	= bestFitness,
-			maxKey 		= startKeyPhrase,
-			bestKey 	= maxKey,
-			temp 		= Temp,
-			count 		= 0;
-		
-		function loop() {
-			var newKey 		= Playfair._changeKey(maxKey);
-				pt 			= Playfair._decipher(newKey, ct);
-			var newFitness 	= TextFitness._calcFitness(pt),
-				dF 			= newFitness - maxFitness;
-
-			document.getElementById("playfair-minkey").innerHTML = newKey + " (" + newFitness + ")";
-			if (dF >= 0) {
-				maxFitness 	= newFitness;
-				maxKey 		= newKey;
-			} else if (temp > 0) {
-				if (Math.exp(dF/temp) > Math.random()) {
-					maxFitness 	= newFitness;
-					maxKey 		= newKey;
-				}
-			}
-
-			if (maxFitness > bestFitness) {	
-				bestFitness = maxFitness;
-				bestKey 	= maxKey;
-				document.getElementById("playfair-bestkey").innerHTML = maxKey + " (" + maxFitness + ")";
-				Playfair._updateGridWithKey(maxKey);
-				Playfair._manualDecipher();
-				Playfair._manualAutoSpacer();
-			}
-
-			// Looping part
-			if (count >= Count && temp >= 0) {
-				temp -= Step;
-				count = 0;
-			}
-			if (temp >= 0 && count < Count) {
-				count++;
-				if (!Playfair.isAutoSolverPausing) setTimeout(loop, Playfair.autoSolverVisualSpeed);
-			}
-		}
-
-		loop();
-
-		function autoSolver () {
-			//console.log(minKey, maxFitness, bestFitness);
-			var newKey = self._changeKey(maxKey);
-			pt = self._autoDecipher(newKey);
-			var newFitness = TextFitness._calcFitness(pt);
-			var dF = newFitness - bestFitness;
-			if (dF >= 0) {
-				maxFitness = newFitness;
-				maxKey = newKey;
-			} else if (temp > 0) {
-				if (Math.exp(dF/temp) > Math.random()) {
-					maxFitness = newFitness;
-					maxKey = newKey;
-				}
-			}
-			document.getElementById("playfair-minkey").innerHTML = newKey + " (" + newFitness + ")";
-			if (maxFitness > bestFitness) {
-				
-				bestFitness = maxFitness;
-				bestKey = maxKey;
-				console.log(bestKey, bestFitness);
-				document.getElementById("playfair-bestkey").innerHTML = maxKey + " (" + maxFitness + ")";
-				self._updateGridWithKey(bestKey);
-			}
-			//setTimeout(function() {
-				if (count >= Count && temp >= 0) {
-					temp -= Step;
-					console.log("temp dropped (" + temp + "/" + Temp + ")");
-					count = 0;
-				}
-				if (temp >= 0 && count < Count) {
-					count++;						
-					autoSolver();
-
-				}
-			//}, 0);
-		}
-
-		
-		
-
-		
-/*
-		for (var temp = Temp; temp >= 0; temp -= Step) {
-			for (var count = 0; count < Count; count++) {
-				this._changeKey(this.grid);
-				var newKey = this.grid.join("");
-				pt = this.manualPlaintextElement.value;
-				var newFitness = TextFitness._calcFitness(pt);
-				var dF = newFitness - bestFitness;
-				if (dF <= 0) {
-					minFitness = newFitness;
-					minKey = newKey;
-				} else if (temp > 0) {
-					if (Math.exp(dF/temp) > Math.random()) {
-						minFitness = newFitness;
-						minKey = newKey;
-					}
-				}
-			}
-		}*/
-	},
-
-	_changeKey: function (key) {
-		var grid = key.split("");
-		var r = Math.floor(Math.random() * 50);
-		switch (r) {
-			case 0: this._swapRows(grid); break;
-			case 1: this._swapColumns(grid); break;
-			case 2: this._flipRows(grid); break;
-			case 3: this._flipColumns(grid); break;
-			case 4: this._reverseGrid(grid); break;
-			default: this._swapLetters(grid); break;
-			
-		}
-		return grid.join("");
-		
-
-	},
-
-	_reverseGrid: function (grid) {
-		grid = grid.reverse();
-	},
-
-	_swapLetters: function(grid) {
-		var letter1 = Math.floor(Math.random() * 25);
-		var letter2 = Math.floor(Math.random() * 25);
-
-		var letter = grid[letter1];
-		grid[letter1] = grid[letter2];
-		grid[letter2] = letter;
-	},
-
-	_swapRows: function (grid) {
-		var row1 = Math.floor(Math.random() * 5);
-		var row2 = Math.floor(Math.random() * 5);
-
-		var row    = [grid[row1 * 5 + 0], grid[row1 * 5 + 1], grid[row1 * 5 + 2], grid[row1 * 5 + 3], grid[row1 * 5 + 4]];
-		
-		grid[row1 * 5 + 0] = grid[row2 * 5 + 0];
-		grid[row1 * 5 + 1] = grid[row2 * 5 + 1];
-		grid[row1 * 5 + 2] = grid[row2 * 5 + 2];
-		grid[row1 * 5 + 3] = grid[row2 * 5 + 3];
-		grid[row1 * 5 + 4] = grid[row2 * 5 + 4];
-
-		grid[row2 * 5 + 0] = row[0];
-		grid[row2 * 5 + 1] = row[1];
-		grid[row2 * 5 + 2] = row[2];
-		grid[row2 * 5 + 3] = row[3];
-		grid[row2 * 5 + 4] = row[4];
-		
-	},
-
-	_swapColumns: function (grid) {
-		var col1 = Math.floor(Math.random() * 5);
-		var col2 = Math.floor(Math.random() * 5);
-		var col = [grid[0 * 5 + col1], grid[1 * 5 + col1], grid[2 * 5 + col1], grid[3 * 5 + col1], grid[4 * 5 + col1]];
-		
-		grid[0 * 5 + col1] = grid[0 * 5 + col2];
-		grid[1 * 5 + col1] = grid[1 * 5 + col2];
-		grid[2 * 5 + col1] = grid[2 * 5 + col2];
-		grid[3 * 5 + col1] = grid[3 * 5 + col2];
-		grid[4 * 5 + col1] = grid[4 * 5 + col2];
-
-		grid[0 * 5 + col2] = col[0];
-		grid[1 * 5 + col2] = col[1];
-		grid[2 * 5 + col2] = col[2];
-		grid[3 * 5 + col2] = col[3];
-		grid[4 * 5 + col2] = col[4];
-	},
-
-	_flipRows: function (grid) {
-		var row1 = [grid[0], grid[1], grid[2], grid[3], grid[4]];
-		var row2 = [grid[5], grid[6], grid[7], grid[8], grid[9]];
-		
-		for (var i = 0; i < 5; i++) {
-			grid[0 + i] = grid[20 + i];
-			grid[20 + i] = row1[i];
-
-			grid[5 + i] = grid[15 + i];
-			grid[15 + i] = row2[i];
-		}
-
-		
-	},
-
-	_flipColumns: function (grid) {
-		var col1 = [grid[0 * 5], grid[1 * 5], grid[2 * 5], grid[3 * 5], grid[4 * 5]];
-		var col2 = [grid[0 * 5 + 1], grid[1 * 5 + 1], grid[2 * 5 + 1], grid[3 * 5 + 1], grid[4 * 5 + 1]];
-		
-		for (var i = 0; i < 5; i++) {
-			grid[i * 5] = grid[i * 5 + 4];
-			grid[i * 5 + 4] = col1[i];
-
-			grid[i * 5 + 1] = grid[i * 5 + 3];
-			grid[i * 5 + 3] = col2[i];
-		}
-
 	},
 
 	_addCribTrans: function(cribIndex) {
@@ -651,12 +602,6 @@ var Playfair = {
 		}
 
 		return true;
-	},
-
-	_manualAutoSpacer: function () {
-		var pt = document.getElementById("playfair-textarea-plaintext").value;
-
-		document.getElementById("playfair-textarea-plaintext").value = WordFinder._wordFind(text_sanitize(pt)).toLowerCase();
 	},
 
 	_alternateGrids: function(grid, pattern=null) {
@@ -1302,9 +1247,6 @@ var Playfair = {
 		this.gridElement.appendChild(controlPusherRow);
 	},
 
-
-	
-
 	// This creates a list of the words from the auto spacer in their pattern form for the pattern finder thingy
 	_initWordPatterns: function () {
 		for (var i = 0; i < topWords.length; i++) {
@@ -1406,4 +1348,4 @@ var Playfair = {
 
 
 
-Playfair._init();
+//Playfair._init();

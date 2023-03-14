@@ -49,6 +49,22 @@ export const Cipher = {
 
 				return [pt, ptCt];
 			},
+
+				// Create a key for the shift cipher given an A to some letter mapping
+			_getShiftKey: function (letter) {
+				// A -> letter
+				return Alphabet.substring(Alphabet.indexOf(letter)) + Alphabet.substring(0, Alphabet.indexOf(letter));
+			},
+
+			// Given a key phrase, strip repeated letters and extrapolate the rest of the alphabet.
+			_getFullKey: function (key) {
+				var shortedKey = text_sanitize(key).split("").filter((a, b, c) => c.indexOf(a) == b).join("");
+				return shortedKey + Alphabet.replace(new RegExp("[" + shortedKey + "]", "g"), "");;
+			},
+
+			_getKeyPhrase: function (key) {
+				return key[0];
+			},
 		},
 		
 		substitution: {
@@ -76,6 +92,21 @@ export const Cipher = {
 				}
 
 				return [pt, ptCt];
+			},
+
+			// Given a key phrase, strip repeated letters and extrapolate the rest of the alphabet.
+			_getFullKey: function (key) {
+				var shortedKey = text_sanitize(key).split("").filter((a, b, c) => c.indexOf(a) == b).join("");
+				return shortedKey + Alphabet.replace(new RegExp("[" + shortedKey + "]", "g"), "");;
+			},
+
+			_getKeyPhrase: function (key) {
+				var phrase = "";
+				while (phrase + Alphabet.replace(new RegExp("[" + phrase + "]", "g"), "") !== key) {
+					phrase += key[phrase.length];
+				}
+
+				return phrase;
 			},
 		},
 	},
@@ -107,6 +138,45 @@ export const Cipher = {
 	},
 	digraph: {
 		playfair: {
+			// Given a key, find the key phrase (sequence of characters not in alphabetical order)
+			// Will check equivalent keys and return smallest key
+			_getKeyPhrase: function (key) {
+				var grid = key.split("");
+				var keyPhrase = key;
+				for (var i = 0; i < 5; i++) {
+					for (var j = 0; j < 5; j++) {
+						var row = [grid[0], grid[1], grid[2], grid[3], grid[4]];
+						for (var k = 0; k < 5; k++) {
+							for (var l = 0; l < 4; l++) {
+								grid[k + l * 5] = grid[k + (l + 1) * 5];
+							}
+							grid[k + 20] = row[k];
+						}
+						var newKey = grid.join("");
+						var phrase = "";
+						while (phrase + Alphabet.replace("J", "").replace(new RegExp("[" + phrase + "]", "g"), "") !== newKey) {
+							phrase += newKey[phrase.length];
+						}
+						if (phrase.length < keyPhrase.length) keyPhrase = phrase;
+					}
+					var col = [grid[0], grid[5], grid[10], grid[15], grid[20]];
+					for (var k = 0; k < 5; k++) {
+						for (var l = 0; l < 4; l++) {
+							grid[k * 5 + l] = grid[k * 5 + l + 1];
+						}
+						grid[k * 5 + 4] = col[k];
+					}
+				}
+				return keyPhrase;
+
+				//var phrase = "";
+				//while (phrase + Alphabet.replace("J", "").replace(new RegExp("[" + phrase + "]", "g"), "") !== key) {
+				//	phrase += key[phrase.length];
+				//}
+
+				//return phrase;
+			},
+
 			// Encipher a plaintext with a playfair key.
 			_encipher: function (key, pt) {
 				var ct = "";

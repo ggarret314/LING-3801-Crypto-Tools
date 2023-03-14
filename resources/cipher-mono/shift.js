@@ -34,7 +34,7 @@ const ShiftCipher = {
 	_decipher: function () {
 		var key = Cipher.mono._getShiftKey(Alphabet[this.key]),
 			ct  = text_sanitize(this.ele.textareaCiphertext.value),
-			pt  = Cipher.mono.shift._decipher(key, ct);
+			pt  = Cipher.mono.shift._decipher(key, ct)[0];
 		if (this.ele.checkboxAutoSpaces.checked) {
 			pt = WordFinder._wordFind(pt);
 		}

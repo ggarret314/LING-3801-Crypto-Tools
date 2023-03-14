@@ -1,12 +1,15 @@
-import { text_sanitize, WordFinder, TextFitness, EnglishFrequencies } from './main.js';
-import Ciphers from './cipher.js';
-onmessage = (e) => {
-	console.log("Received: ", e.data.task, e.data.args);
+import { Alphabet, text_sanitize, WordFinder, TextFitness, EnglishFrequencies } from './main.js';
+import { Cipher } from './cipher.js';
+
+console.log("[Solver] FART");
+
+
+onmessage = e => {
+	
 	if (e.data.task) {
 		switch (e.data.task) {
 			case "solve":
-				console.log("OKAY");
-				console.log(AutoSolver._solve(
+				Solver._solve(
 					e.data.args.startKey, 
 					e.data.args.ct, 
 					e.data.args.ciphers, 
@@ -14,19 +17,45 @@ onmessage = (e) => {
 					e.data.args.Step, 
 					e.data.args.Count, 
 					e.data.args.stopWhenNear
-				));
+				);
 		}
 	}
 	
-}
+};
 
-// Auto: holds the code for Auto-Solving ciphers, as well as
-//       the core algorithms for each cipher.
-export const AutoSolver = {
+// Solver: holds the code for Auto-Solving ciphers, as well as
+//         the core algorithms for each cipher.
+const Solver = {
 
 	// operations for monoalphabetic ciphers (including shift)
-	mono: {
+	shift: {
+		keyChanger: [
+			// 1: shift the key some direction
+			(grid) => {
+				grid.push(grid.shift())
+				//if (Math.random() > 0.5) grid.push(grid.shift());
+				//else grid.unshift(grid.pop());
+			}
+		],
 
+		_changeKey: function (key) {
+			var grid = key.split("");
+
+			this.keyChanger[0](grid);
+
+			return grid.join("");
+		},
+
+		_encipher: Cipher.mono.substitution._encipher,
+		
+		_decipher: Cipher.mono.substitution._decipher,
+		
+		_getFullKey: Cipher.mono._getFullKey,
+
+		_getKeyPhrase: Cipher.mono._getKeyPhrase,
+	},
+
+	substitution: {
 		keyChanger: [
 			// 0: swap two letters
 			(grid) => {
@@ -55,7 +84,13 @@ export const AutoSolver = {
 			return grid.join("");
 		},
 
+		_encipher: Cipher.mono.substitution._encipher,
 		
+		_decipher: Cipher.mono.substitution._decipher,
+
+		_getFullKey: Cipher.mono._getFullKey,
+
+		_getKeyPhrase: Cipher.mono._getKeyPhrase,
 		
 	},
 
@@ -154,7 +189,9 @@ export const AutoSolver = {
 			return bestKeyLengths;
 		},
 		
+		_encipher: Cipher.poly.vigenere._encipher,
 		
+		_decipher: Cipher.poly.vigenere._decipher,
 
 		_solver: function (key, ct) {
 
@@ -232,10 +269,6 @@ export const AutoSolver = {
 			(grid) => grid.reverse(),
 		],
 
-		_test: function () {
-			return this;
-		},
-
 		_changeKey: function (key) {
 			var grid = key.split("");
 			var r = Math.floor(Math.random() * 50);
@@ -298,6 +331,10 @@ export const AutoSolver = {
 			//return phrase;
 		},
 
+		_encipher: Cipher.digraph.playfair._encipher,
+		
+		_decipher: Cipher.digraph.playfair._decipher,
+
 		
 	},
 
@@ -321,13 +358,14 @@ export const AutoSolver = {
 		var cipher = ciphers[0];
 
 		var cipherOps = this[cipher];
-		
+		//console.log(cipherOps);
 		// Format key for type of cipher:
 		var key = cipherOps._getFullKey(startKey);
 
 		// Intialize variables
-		var pt = cipherOps._decipher(key, ct),
-			maxFitness = TextFitness._calcFitness(pt),
+		var pt = cipherOps._decipher(key, ct);
+		if (typeof pt !== 'string') pt = pt[0];
+		var	maxFitness = TextFitness._calcFitness(pt),
 			bestFitness = maxFitness,
 			maxKey = key,
 			bestKey = maxKey,
@@ -336,11 +374,15 @@ export const AutoSolver = {
 			guessFitness = TextFitness._calcGuessFitness(ct.length),
 			attempts = 0,
 			stillSearching = true;
-		
+			postMessage({
+				task: "solve_newBestKey",
+				data: [[bestKey], [bestFitness]]
+			})
 		// The main loop
 		while (stillSearching && temp >= 0) {
 			var newKey 		= cipherOps._changeKey(maxKey);
 				pt 			= cipherOps._decipher(newKey, ct);
+			if (typeof pt !== 'string') pt = pt[0];
 			var newFitness 	= TextFitness._calcFitness(pt),
 				dF 			= newFitness - maxFitness;
 
@@ -358,10 +400,10 @@ export const AutoSolver = {
 				bestFitness = maxFitness;
 				bestKey 	= maxKey;
 				attempts 	= 0;
-				//postMessage({
-				//	task: "solve_newBestKey",
-				//	data: [bestKey, bestFitness]
-				//});
+				postMessage({
+					task: "solve_newBestKey",
+					data: [[bestKey], [bestFitness]]
+				});
 				console.log("New best Key: ", bestKey, bestFitness);
 			}
 
@@ -380,10 +422,12 @@ export const AutoSolver = {
 
 			}
 		}
-
+		
+		pt = cipherOps._decipher(bestKey, ct);
+		if (typeof pt !== 'string') pt = pt[0];
 		return {
-			key: cipherOps._getKeyPhrase(bestKey),
-			pt: WordFinder._wordFind(cipherOps._decipher(bestKey, ct)).toLowerCase(),
+			key: [cipherOps._getKeyPhrase(bestKey)],
+			pt: pt
 		}
 		
 	},

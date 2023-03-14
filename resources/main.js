@@ -127,7 +127,7 @@ export var WordFinder = {
 // TextFitness: this is used by the auto solver and notably can calculate the fitness level of
 //              a particular text, i.e. a rating of how much it looks like English.
 export var TextFitness = {
-	quadgrams: quadgrams,
+	quadgrams: Quadgrams,
 	fitness: null,
 	sum: null,
 	floor: null,
@@ -155,7 +155,7 @@ export var TextFitness = {
 		var x = 0;
 		for (var i = 0; i < str.length - 4; i++) {
 			var a = Alphabet.indexOf(str[i]) * 17576 + Alphabet.indexOf(str[i + 1]) * 676 + Alphabet.indexOf(str[i + 2]) * 26 + Alphabet.indexOf(str[i + 3]);
-			x += quadGRAMS[a];
+			x += this.quadgrams[a];
 		}
 
 		return x;

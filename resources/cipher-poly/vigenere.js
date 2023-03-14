@@ -336,3 +336,6 @@ const VigenereCipher = {
 }
 
 VigenereCipher._init();
+
+console.log(Cipher.mono._getFullKey('Corner Begins at the Weirdest Place'));
+console.log(VigenereCipher._icStats("EACMSCQALPHEGFEFTZNUTHCWQMTECWIGJTTXRFQWTQXKVDLHUGXZEQHIXLDPQBJBZIGUVBDRSDKDUMSRRGIAQSUAYLUJESISORISJFWLPKURWBDPBLSJDVVVDWNRTNULIMIEZSWYBYJKDKSYZKSLQM"));

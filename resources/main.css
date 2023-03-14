@@ -359,7 +359,7 @@ a.f {
 
 .page-split {
 	display: inline-block; 
-	width: 500px;
+	width: 490px;
 	vertical-align: top;
 }
 
@@ -372,12 +372,14 @@ a.f {
 	font-family: consolas;
 }
 
-#playfair-pattern-container {
+
+#playfair-patterns {
 	height: 350px;
-	overflow-y: scroll;
+	overflow-y: auto;
+	background-color: #f9f9f9;
 }
 
-#playfair-pattern-container li {
+#playfair-patterns li {
 	padding: 5px 0;
 }
 
@@ -532,4 +534,16 @@ h3 {
 	line-height: 15px;
 	padding: 0;
 	margin: 0;
+}
+
+
+@media (max-width: 800px) {
+	.page-split {
+		width: 100%;
+		overflow-x: auto;
+	}
+
+	#playfair-patterns {
+		width: 490px;
+	}
 }
