@@ -16,7 +16,7 @@
 		<div>
 			<div>
 				Key Phrase: <input id="key-phrase" type="text" />
-				<input id="key-set-cipher-btn" type="button" value="Set Key" />
+				<input id="key-set-cipher-btn" type="button" value="Set Key" /> <input id="key-auto" type="checkbox" /> Auto-Key
 			</div>
 		</div>
 		<div class="page-section-title">Analysis <span class="title-options"><input id="view-analysis" type="checkbox" /> View</span></div>

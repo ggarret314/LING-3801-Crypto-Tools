@@ -28,7 +28,8 @@ const VigenereCipher = {
 		checkboxAutoSpaces: document.getElementById("auto-spaces"),
 		repeatedHeaders: document.getElementById("repeated-headers"),
 		repeatedContents: document.getElementById("repeated-contents"),
-		frequencyCharts: document.getElementById("frequency-charts")
+		frequencyCharts: document.getElementById("frequency-charts"),
+		keyAuto: document.getElementById("key-auto"),
 	},
 
 	freqCharts: [],
@@ -116,7 +117,7 @@ const VigenereCipher = {
 	_decipher: function () {
 		var key = this.key,
 			ct  = text_sanitize(this.ele.textareaCiphertext.value),
-			pt  = Cipher.poly.vigenere._decipher(key, ct);
+			pt  = this.ele.keyAuto.checked ? Cipher.poly.autovigenere._decipher(key, ct) : Cipher.poly.vigenere._decipher(key, ct);
 		
 		this._updateRepeated();
 		//this.frequencyTable._updateFrequencyTable(ct);
@@ -128,7 +129,7 @@ const VigenereCipher = {
 	_encipher: function () {
 		var key = this.key,
 			pt  = text_sanitize(this.ele.textareaPlaintext.value),
-			ct  = Cipher.poly.vigenere._encipher(key, pt);
+			ct  = this.ele.keyAuto.checked ? Cipher.poly.autovigenere._encipher(key, pt) : Cipher.poly.vigenere._encipher(key, pt);
 		
 			this._updateRepeated();
 			//this.frequencyTable._updateFrequencyTable(ct);

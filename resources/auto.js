@@ -27,7 +27,9 @@ const Auto = {
 		shift: 'mono',
 		substitution: 'mono',
 		vigenere: 'poly',
+		autovigenere: 'poly',
 		playfair: 'digraph',
+		columnar: 'trans',
 	},
 
 	availableCiphers: [
@@ -35,7 +37,9 @@ const Auto = {
 		['Shift', 'shift'],
 		['Simple Substitution', 'substitution'],
 		['Vigenere', 'vigenere'],
+		['Vigenere Auto Key', 'autovigenere'],
 		['Playfair', 'playfair'],
+		['Columnar Trans', 'columnar'],
 	],
 
 	_decipher: function () {
@@ -116,7 +120,7 @@ const Auto = {
 		this.ele.numCipherUpdate.click();
 
 		this.ele.solveBtn.addEventListener("click", function (e) {
-			self._sendSolveMessage('', text_sanitize(self.ele.textareaCiphertext.value), self.cipherList);
+			self._sendSolveMessage('A', text_sanitize(self.ele.textareaCiphertext.value), self.cipherList);
 		});
 
 		this.ele.checkboxAutoSpaces.addEventListener("change", function (e) {

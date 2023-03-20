@@ -1,7 +1,7 @@
 import { Alphabet, text_sanitize, WordFinder, TextFitness, EnglishFrequencies } from './main.js';
 import { Cipher } from './cipher.js';
 
-console.log("[Solver] FART");
+console.log("[Solver] Loaded");
 
 
 onmessage = e => {
@@ -9,6 +9,7 @@ onmessage = e => {
 	if (e.data.task) {
 		switch (e.data.task) {
 			case "solve":
+				console.log("[Solver] Solving...");
 				Solver._solve(
 					e.data.args.startKey, 
 					e.data.args.ct, 
@@ -117,6 +118,11 @@ const Solver = {
 			(grid) => {
 				if (Math.random() > 0.5) grid.push(grid.shift());
 				else grid.unshift(grid.pop());
+			},
+			// 3: Add / remove a letter
+			(grid) => {
+				if (Math.random() > 0.5) grid.splice(grid.length - 1, 1);
+				else grid.push('A');
 			}
 		],
 
@@ -126,6 +132,7 @@ const Solver = {
 			switch (r) {
 				case 0: this.keyChanger[1](grid); break;
 				case 1: this.keyChanger[2](grid); break;
+				case 2: this.keyChanger[3](grid); break;
 				default: this.keyChanger[0](grid); break;
 			}
 
@@ -192,6 +199,116 @@ const Solver = {
 		_encipher: Cipher.poly.vigenere._encipher,
 		
 		_decipher: Cipher.poly.vigenere._decipher,
+
+		_solver: function (key, ct) {
+
+		},
+	},
+
+	// Operations for vigenere ciphers
+	autovigenere: {
+
+		keyChanger: [
+			// 0: change a letter by one up or down
+			(grid) => {
+				var letter = Math.floor(Math.random() * grid.length);
+				if (Math.random() > 0.5) grid[letter] = Alphabet[(Alphabet.indexOf(grid[letter]) + 1) % 26];
+				else grid[letter] = Alphabet[(Alphabet.indexOf(grid[letter]) + 25) % 26];
+			},
+			// 1: swap two letters
+			(grid) => {
+				var letter1 = Math.floor(Math.random() * grid.length);
+				var letter2 = Math.floor(Math.random() * grid.length);
+		
+				var letter = grid[letter1];
+				grid[letter1] = grid[letter2];
+				grid[letter2] = letter;
+			},
+			// 2: shift the key some direction
+			(grid) => {
+				if (Math.random() > 0.5) grid.push(grid.shift());
+				else grid.unshift(grid.pop());
+			},
+			// 3: Add / remove a letter
+			(grid) => {
+				if (Math.random() > 0.5) grid.splice(grid.length - 1, 1);
+				else grid.push('A');
+			}
+		],
+
+		_changeKey: function (key) {
+			var grid = key.split("");
+			var r = Math.floor(Math.random() * 40);
+			switch (r) {
+				case 0: this.keyChanger[1](grid); break;
+				case 1: this.keyChanger[2](grid); break;
+				case 2: this.keyChanger[3](grid); break;
+				default: this.keyChanger[0](grid); break;
+			}
+
+			return grid.join("");
+		},
+	
+		// Just sanitize
+		_getFullKey: function (key) {
+			return text_sanitize(key);
+		},
+
+		_getKeyPhrase: function (key) {
+			return key;
+		},
+
+		// Calculate the best key lengths in order
+		// based on avg index of coincidences
+		_icKeyLengths: function (s, maxKeyLength=32) {
+			var bestKeyLengths = [];
+			
+			var cosets = {}
+			for (var i = 1; i <= maxKeyLength; i++) {
+				var unigrams = [];
+				cosets[i] = [];
+				for (var j = 0; j < i; j++) {
+					cosets[i].push("");
+					unigrams[j] = {_: 0, 
+						A: 0, B: 0, C: 0, D: 0, E: 0, 
+						F: 0, G: 0, H: 0, I: 0, J: 0, 
+						K: 0, L: 0, M: 0, N: 0, O: 0, 
+						P: 0, Q: 0, R: 0, S: 0, T: 0, 
+						U: 0, V: 0, W: 0, X: 0, Y: 0, 
+						Z: 0
+					};
+				}
+	
+				for (var j = 0; j < s.length; j++) {
+					cosets[i][j % i] += s[j];
+					unigrams[j % i][s[j]]++;
+					unigrams[j % i]._++;
+				}
+	
+				//console.log(unigrams);
+				var avgIC = 0;
+				for (var j = 0; j < unigrams.length; j++) {
+					var ic = 0;
+					for (var k = 0; k < 26; k++) {
+						ic += unigrams[j][Alphabet[k]] * (unigrams[j][Alphabet[k]] - 1);
+					}
+					ic *= 1 / (unigrams[j]._ * (unigrams[j]._ - 1));
+					avgIC += ic;
+				}
+	
+				avgIC /= unigrams.length;
+				bestKeyLengths.push([unigrams.length, avgIC]);
+	
+			}
+	
+			bestKeyLengths.sort((a, b) => b[1] - a[1]);
+	
+			return bestKeyLengths;
+		},
+		
+		_encipher: Cipher.poly.autovigenere._encipher,
+		
+		_decipher: Cipher.poly.autovigenere._decipher,
 
 		_solver: function (key, ct) {
 
@@ -338,10 +455,66 @@ const Solver = {
 		
 	},
 
-	// Operations for transposition ciphers (columnar/rail)
-	trans: {
+	// Operations for columnar trans cipher
+	columnar: {
+		// Just sanitize
+		_getFullKey: function (key) {
+			return text_sanitize(key);
+		},
+
+		_getKeyPhrase: function (key) {
+			return key;
+		},
+
+		keyChanger: [
+			// 0: swap key numbers
+			(grid) => {
+				var num1 = Math.floor(Math.random() * grid.length);
+				var num2 = Math.floor(Math.random() * grid.length);
+				
+				var x = grid[num1];
+				grid[num1] = grid[num2];
+				grid[num2] = x;
+				//console.log(grid);
+			},
+			// 1: change dimension of trans table (length of key)
+			(grid, ptLength) => {
+				if (Math.random() > 0.5 || grid.length == 0) {
+					// increase length
+					grid.push(grid.length);
+					while (ptLength % grid.length !== 0) grid.push(grid.length)
+				} else {
+					// decrease length
+					grid.splice(grid.indexOf(grid.length - 1), 1);
+					while (ptLength % grid.length !== 0) grid.splice(grid.indexOf(grid.length - 1), 1);
+				}
+
+				//console.log(grid);
+			},
+		],
+
+		_changeKey: function (key, ptLength) {
+			var grid = Cipher.trans.columnar._keyNumberify(key);
+			var r = Math.floor(Math.random() * 40);
+			switch (r) {
+				case 0: this.keyChanger[1](grid, ptLength); break;
+				default: this.keyChanger[0](grid); break;
+			}
+			if (grid.length == 0) grid = [0];
+			//console.log(Cipher.trans.columnar._keyStringify(grid));
+			return Cipher.trans.columnar._keyStringify(grid);
+		},
+
+		_encipher: Cipher.trans.columnar._encipher,
+		
+		_decipher: Cipher.trans.columnar._decipher,
+	},
+
+	railfence: {
 
 	},
+
+	
 
 	// _identify: Determines what kind of cipher(s) a particular cipher text is enciphered with.
 	// 			  returns an array of the ciphers.
@@ -364,6 +537,7 @@ const Solver = {
 
 		// Intialize variables
 		var pt = cipherOps._decipher(key, ct);
+		
 		if (typeof pt !== 'string') pt = pt[0];
 		var	maxFitness = TextFitness._calcFitness(pt),
 			bestFitness = maxFitness,
@@ -380,8 +554,9 @@ const Solver = {
 			})
 		// The main loop
 		while (stillSearching && temp >= 0) {
-			var newKey 		= cipherOps._changeKey(maxKey);
+			var newKey 		= cipherOps._changeKey(maxKey, pt.length);
 				pt 			= cipherOps._decipher(newKey, ct);
+				
 			if (typeof pt !== 'string') pt = pt[0];
 			var newFitness 	= TextFitness._calcFitness(pt),
 				dF 			= newFitness - maxFitness;
@@ -395,7 +570,7 @@ const Solver = {
 					maxKey 		= newKey;
 				}
 			}
-
+			//console.log(newKey);
 			if (maxFitness > bestFitness) {	
 				bestFitness = maxFitness;
 				bestKey 	= maxKey;

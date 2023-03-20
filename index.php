@@ -15,7 +15,7 @@ for($i = 0; $i < count($params); $i+=2) {
 
 // Valid page names. Anything else the user attempts to access is discarded.
 $pageNames = array(
-	"mono", "poly", "digraph", "trans", "auto"
+	"mono", "poly", "digraph", "trans", "auto", "other"
 );
 
 $pageScripts = array();
