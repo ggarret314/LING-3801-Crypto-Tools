@@ -2,7 +2,7 @@
 
 
 $LING3801 = array(
-	"root_dir" => "https://gserver.gov:8443/ling3801/"
+	"root_dir" => "https://gserver.gov/ling3801/"
 );
 
 ?>

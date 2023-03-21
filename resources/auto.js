@@ -30,6 +30,7 @@ const Auto = {
 		autovigenere: 'poly',
 		playfair: 'digraph',
 		columnar: 'trans',
+		enigma: 'other',
 	},
 
 	availableCiphers: [
@@ -40,10 +41,12 @@ const Auto = {
 		['Vigenere Auto Key', 'autovigenere'],
 		['Playfair', 'playfair'],
 		['Columnar Trans', 'columnar'],
+		['Enigma', 'enigma'],
 	],
 
 	_decipher: function () {
 		var pt = text_sanitize(this.ele.textareaCiphertext.value);
+		
 		for (var i = 0; i < this.cipherList.length; i++) {
 			
 			pt = Cipher[this.ciphers[this.cipherList[i]]][this.cipherList[i]]._decipher(this.keys[i], pt);
@@ -93,11 +96,13 @@ const Auto = {
 			self.cipherList = [];
 			self.keys = [];
 			for (var i = 1; i <= self.numCipherMax; i++) {
-				self.keys.push('');
+				//self.keys.push('');
 				var li = document.createElement("li");
 				var select = document.createElement("select");
+				var seed = document.createElement("input");
 				select.setAttribute("data-i", i - 1);
 				self.cipherList.push('unknown');
+				self.keys.push('A');
 				select.addEventListener('change', function (ev) {
 					self.cipherList[parseInt(ev.target.getAttribute('data-i'))] = ev.target.value;
 					console.log(self.cipherList);
@@ -108,9 +113,19 @@ const Auto = {
 					option.innerHTML = self.availableCiphers[j][0];
 					select.appendChild(option);
 					
-				}
+				};
+
+				seed.setAttribute("data-i", i - 1);
+				seed.setAttribute("placeholder", "seed");
+				seed.value = "A";
+				seed.addEventListener("change", function (e) {
+					self.keys[parseInt(e.target.getAttribute("data-i"))] = e.target.value;
+				});
+
 				li.appendChild(select);
+				li.appendChild(seed);
 				self.ele.cipherList.appendChild(li);
+
 
 
 				self.ele.keyList.innerHTML += "<li>Key: <span>-</span></li>";
@@ -120,7 +135,7 @@ const Auto = {
 		this.ele.numCipherUpdate.click();
 
 		this.ele.solveBtn.addEventListener("click", function (e) {
-			self._sendSolveMessage('A', text_sanitize(self.ele.textareaCiphertext.value), self.cipherList);
+			self._sendSolveMessage(self.keys, text_sanitize(self.ele.textareaCiphertext.value), self.cipherList);
 		});
 
 		this.ele.checkboxAutoSpaces.addEventListener("change", function (e) {
@@ -131,17 +146,20 @@ const Auto = {
 
 Auto._init();
 
-//Auto._sendSolveMessage('', 'QCBMPIOCWHBOSOIXWDBMMYBILFKOONSMKOTQULIFGMKFQCBMYSTQULIFGLCXDYFWFMYZCTHWFGKQTCASQHBMYSBKNWNIELDTIKOFRVLCWSYGGWSHTKOFTCBYHXDULUSGLKOFNCHWDUDWYGWGFLBKQYCMTCBGULCKIXWDGBVKHWDMBLMUKDPZCMBSPAFEPOEDBYPAFEPOGHZKLDOKHBBISNFDCMNCHWDUDWYGWGFLSGZKHENGEZCMCTFUFLYBPOEGMUNGEZCMCTWGFHEFFHGKXLGNQHWDOKDBHBHWCLVHUDTCULPTATUDSBTKOFPOEYKOEOFEPIKZCMBLMUKDPZFCFLWISHBYELCHWDTQULIFLUKLGMBMUYYAQKOFTLKFNCHWDUDWYGWGFLWMTQGTQWOINGGIVUMCHWDULESYOIWMTQIQVNSGHBHWDULEDUFLIOGLCXWDMCHWKOCAPOCYIBWDTQULIFDULWSOLFCKIPKCCWWDBMMYBILFSPPOWRFHEKFEKOTKYCFWFMMTFWCWYPLUNKOFWGEYIBKIONCMMTSOCQOFGNQYULFMWDOMMHKCFWDMFEKOHWFEYZLKKFIKOFHWQTWDYGEFGYYPMONEQKDBWCLFCYKNFLDFBIHWLUYZCFYDINNIBLLFHWDMPSEFPOMONIAKCPKZCTYBYZALKPHWCWTKYKTQULIFLESYOIBSLFSYSHTKOFBIOICQDFNCAKMUQTWCLFEGKZPOBKVUAKMWOCWHWGCOIXNGFWLUQCKOHWCWTKDITCIOLEMOIMNGHWFWLWSXSHSAZKLAPOCKIXWDENSBDZDMWLBSNICXWDMTKZCHBYHWVLOGDWKOCHWDGBQKHXSYKOHWFELSGSKFULNKDBHBHWSBCNNWULGYLVAYBSKQYQNBLATLHWGYIFKOCABYGKTMQCBMTQIXWDPSFYSBWCVKNGSGUVPAULEYLWIKQHBYWISMGPNWULOPKFVLGNZDIBWCOPBISXWDEFYIPOCKHXSYKOHWDWPOCYNGHWLWPOXWIASBHWDUFMIKIXFEKMOCOIQKOFHWFMBOCMWDBYEHQKHBWCOPKFCKTIYZEFEKIOOBOZHWLWPOBYCHUVDUFEBYKQUDGYPCOMWLTKMCMDMTDUFEYZOYKFCKTCPOBSKFWDALUFEHQCWHWDELYZSDMOSWBYCILACMDVLALOLBKOEAPOSHTKOFTCWDBMMYBILFBMYTQTLQTCSYHWCWTKYKTQULIFLESYTKTCTKMTSYSAYVNAQKSBGMTQHXSYHWFCUDSBCMCTKNFLDFNGHWCWDYFWLEZYXFSNOFHWGLHWDUTQIPKCCLCTLUCNHXSYEFFMPOEHKCGMYSQWMWIPFLCKOFQCBMYTGMRPSYBOUDSBQKUFQYALIBTYBILFQCBMTCWDASCQFLCIQWENLBDUAIVLGKGPPSLXBKQTBMQCKOCBKGLC', ['playfair']);
+//Auto._sendSolveMessage('', '', ['playfair']);
 
-var srahashr = {
-	task: "solve",
-	data: {
-		startKey: "",
-		ct: "",
-		ciphers: ["vigenere"],
-		Temp: 20,
-		Step: 0.2,
-		Count: 50000,
-		stopWhenNear: true
-	}
-}
+var msg = text_sanitize("Her eyebrows were a shade darker than her hair. They were thick and almost horizontal, emphasizing the depth of her eyes. She was rather handsome than beautiful. Her face was captivating by reason of a certain frankness of expression and a contradictory subtle play of features. Her manner was engaging.");
+var key = "r5HDr1QFr2GH|";
+
+console.log(msg);
+console.log(text_sanitize("othzhhnunencchqyksomsjznuomstlzbumztqtwfpivisukohhhrdhonfydrensmocdpvymnvlcyepgqzniiltyekhukanjewztytrgumqobrviomaovtdskvozhopguljorouqepcnwnarggmyjbmeqjzdcpgycyqxtiychdemwspxhtdlfrduibaunlaftaurjzzqmohyxfrbaxthvrubivvydomfpdsjhqveunjvvmdcldfiecmfk"));
+var enigmaCode = Cipher.other.enigma._encipher(key, msg);
+
+console.log(enigmaCode);
+console.log(Cipher.other.enigma._encipher(key, enigmaCode));
+
+//Auto.ele.textareaCiphertext.value = enigmaCode;
+
+// r5AWr1AOr2RR| 
+
+//Auto._sendSolveMessage('A', enigmaCode, ['enigma']);

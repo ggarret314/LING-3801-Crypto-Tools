@@ -1,7 +1,9 @@
 <div id="page-columnar" class="page">
 	<div class="page-title">Engima Machine Cipher</div>
 	<p>
-		More detail behind the Enigma Machine cihper <a href="<?php echo $__ROOTDIR__ ?>other/enigma/explain.php">here</a>.
+		More detail behind the Enigma Machine cihper <a href="<?php echo $__ROOTDIR__ ?>other/enigma/explain.php">here</a>. Note: I haven't quite figured out what I'm
+		doing wrong with the ring/offsets. I was able to get proper encipherment according to <a href="https://en.wikipedia.org/wiki/Enigma_rotor_details">this</a>
+		Wikipedia article (AAAAA -> BZDGO) .
 	</p>
 	<div class="page-content">
 		<?php require_once("module/cipherdirection.php") ?>
@@ -13,9 +15,20 @@
         </div>
 		<div class="page-section-title">Key</div>
 		<div>
-			<div>
-				Key Phrase: <input id="key-phrase" type="text" />
-				<input id="key-set-cipher-btn" type="button" value="Set Key" /><!-- <input id="key-auto" type="checkbox" /> Auto-Key !-->
+			<div><input type="button" value="--" /><input type="button" value="++" /> Rotors:
+				<span class="enigma-select-container">1. <select>
+					<option>I</option>
+					<option>II</option>
+					<option>III</option>
+				</select></span><span class="enigma-select-container">2. <select>
+					<option>I</option>
+					<option>II</option>
+					<option>III</option>
+				</select></span><span class="enigma-select-container">3. <select>
+					<option>I</option>
+					<option>II</option>
+					<option>III</option>
+				</select></span>
 			</div>
 		</div>
 		<div id="encipher-box">

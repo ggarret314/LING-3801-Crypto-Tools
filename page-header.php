@@ -27,6 +27,8 @@
 			<a href="<?php echo $__ROOTDIR__ ?>digraph/playfair">Playfair</a>
 		</div><div class="nav-item">
 			<a href="<?php echo $__ROOTDIR__ ?>trans/columnar">Column Trans</a>
+		</div><div class="nav-item">
+			<a href="<?php echo $__ROOTDIR__ ?>other/enigma">Enigma</a>
 		</div>
 	</nav>
 	<div class="grey-hr"></div>

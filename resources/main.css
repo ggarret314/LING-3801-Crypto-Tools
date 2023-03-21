@@ -536,6 +536,10 @@ h3 {
 	margin: 0;
 }
 
+.enigma-select-container {
+	padding: 0 5px;
+}
+
 
 @media (max-width: 800px) {
 	.page-split {

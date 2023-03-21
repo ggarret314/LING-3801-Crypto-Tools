@@ -33,7 +33,10 @@ const Solver = {
 		keyChanger: [
 			// 1: shift the key some direction
 			(grid) => {
-				grid.push(grid.shift())
+				var x = Math.random() * 26;
+				for (var i = 0; i < x; i++) {
+					grid.push(grid.shift())
+				}
 				//if (Math.random() > 0.5) grid.push(grid.shift());
 				//else grid.unshift(grid.pop());
 			}
@@ -50,7 +53,7 @@ const Solver = {
 		_encipher: Cipher.mono.substitution._encipher,
 		
 		_decipher: Cipher.mono.substitution._decipher,
-		
+
 		_getFullKey: Cipher.mono._getFullKey,
 
 		_getKeyPhrase: Cipher.mono._getKeyPhrase,
@@ -67,6 +70,18 @@ const Solver = {
 				grid[letter1] = grid[letter2];
 				grid[letter2] = letter;
 			},
+			// 1: swap n letters
+			(grid) => {
+				var n = Math.floor(2 + Math.random() * 25);
+				for (var i = 0; i < n; i++) {
+					var letter1 = Math.floor(Math.random() * 25);
+					var letter2 = Math.floor(Math.random() * 25);
+			
+					var letter = grid[letter1];
+					grid[letter1] = grid[letter2];
+					grid[letter2] = letter;
+				}
+			},
 			// 1: shift the key some direction
 			(grid) => {
 				if (Math.random() > 0.5) grid.push(grid.shift());
@@ -76,10 +91,10 @@ const Solver = {
 
 		_changeKey: function (key) {
 			var grid = key.split("");
-			var r = Math.floor(Math.random() * 40);
+			var r = Math.floor(Math.random() * 20);
 			switch (r) {
-				case 0: this.keyChanger[1](grid); break;
-				default: this.keyChanger[0](grid); break;
+				//case 0: this.keyChanger[1](grid); break;
+				default: this.keyChanger[1](grid); break;
 			}
 
 			return grid.join("");
@@ -99,11 +114,14 @@ const Solver = {
 	vigenere: {
 
 		keyChanger: [
-			// 0: change a letter by one up or down
+			// 0: change a letter
 			(grid) => {
 				var letter = Math.floor(Math.random() * grid.length);
+				grid[letter] = Alphabet[Math.floor(Math.random() * Alphabet.length)];
+				/*
 				if (Math.random() > 0.5) grid[letter] = Alphabet[(Alphabet.indexOf(grid[letter]) + 1) % 26];
 				else grid[letter] = Alphabet[(Alphabet.indexOf(grid[letter]) + 25) % 26];
+				*/
 			},
 			// 1: swap two letters
 			(grid) => {
@@ -121,18 +139,27 @@ const Solver = {
 			},
 			// 3: Add / remove a letter
 			(grid) => {
-				if (Math.random() > 0.5) grid.splice(grid.length - 1, 1);
-				else grid.push('A');
-			}
+				if (Math.random() > 0.5 && grid.length > 1) grid.splice(grid.length - 1, 1);
+				else if (grid.length < 32) grid.push('A');
+			},
+			// 4: Update based on IC stats
+			(grid, pt) => {
+				var a = Math.floor(Math.random() * 3);
+				var icstats = Solver.vigenere._icKeyLengths(pt);
+				var newLength = icstats[a][0];
+				while (grid.length < newLength) grid.push('A');
+				while (grid.length > newLength) grid.splice(grid.length - 1, 1);
+			},
 		],
 
-		_changeKey: function (key) {
+		_changeKey: function (key, ptLength, pt) {
 			var grid = key.split("");
 			var r = Math.floor(Math.random() * 40);
 			switch (r) {
 				case 0: this.keyChanger[1](grid); break;
 				case 1: this.keyChanger[2](grid); break;
 				case 2: this.keyChanger[3](grid); break;
+				case 3: this.keyChanger[4](grid, pt); break;
 				default: this.keyChanger[0](grid); break;
 			}
 
@@ -479,28 +506,35 @@ const Solver = {
 			},
 			// 1: change dimension of trans table (length of key)
 			(grid, ptLength) => {
+				
 				if (Math.random() > 0.5 || grid.length == 0) {
 					// increase length
+					//console.log(ptLength, "increase");
 					grid.push(grid.length);
-					while (ptLength % grid.length !== 0) grid.push(grid.length)
+					while (ptLength % grid.length !== 0 && grid.length < 32) grid.push(grid.length);
+					if (ptLength % grid.length !== 0) {
+						while (ptLength % grid.length !== 0) grid.splice(grid.indexOf(grid.length - 1), 1);
+					}
 				} else {
 					// decrease length
-					grid.splice(grid.indexOf(grid.length - 1), 1);
+					if (grid.length > 1) grid.splice(grid.indexOf(grid.length - 1), 1);
 					while (ptLength % grid.length !== 0) grid.splice(grid.indexOf(grid.length - 1), 1);
 				}
-
 				//console.log(grid);
 			},
 		],
 
 		_changeKey: function (key, ptLength) {
+			
 			var grid = Cipher.trans.columnar._keyNumberify(key);
+			
 			var r = Math.floor(Math.random() * 40);
 			switch (r) {
 				case 0: this.keyChanger[1](grid, ptLength); break;
 				default: this.keyChanger[0](grid); break;
 			}
 			if (grid.length == 0) grid = [0];
+			
 			//console.log(Cipher.trans.columnar._keyStringify(grid));
 			return Cipher.trans.columnar._keyStringify(grid);
 		},
@@ -514,6 +548,76 @@ const Solver = {
 
 	},
 
+	enigma: {
+
+		keyChanger: [
+			// 0: shift rotor offset/ring
+			(settings) => {
+				if (Math.random() > 0.5) {
+					var a = Math.floor(Math.random() * settings.rotors.length),
+						b = Math.random() > 0.5 ? "ring" : "pos";
+
+					settings.rotors[a][b] = Math.floor(Math.random() * 26);
+				}
+			},
+			// 1: change a rotor (physical rotor)
+			(settings) => {
+				var a = Math.floor(Math.random() * settings.rotors.length); // r1NNr1YFr1NF|
+				settings.rotors[a].og = Math.floor(1 + Math.random() * 3);
+			},
+			// 2: swap a rotor (positions)
+			(settings) => {
+				var a = Math.floor(Math.random() * settings.rotors.length),
+					b = Math.floor(Math.random() * settings.rotors.length),
+					c = Object.assign(settings.rotors[a]);
+					
+				settings.rotors[a] = Object.assign(settings.rotors[b]);
+				settings.rotors[b] = c;
+			},
+			// 3: change a rotor
+			// 1: shift the key some direction
+			(settings) => {
+				grid.push(grid.shift())
+				//if (Math.random() > 0.5) grid.push(grid.shift());
+				//else grid.unshift(grid.pop());
+			}
+		],
+
+		_changeKey: function (key) {
+			
+			var settings = Cipher.other.enigma._decodeKey(key);
+
+			var r = Math.floor(Math.random() * 80);
+			switch (r) {
+				//case 0: newKey = this.keyChanger[1](settings); break;
+				//case 1: newKey = this.keyChanger[2](settings); break;
+				//case 2: newKey = this.keyChanger[3](settings); break;
+				case 0: this.keyChanger[2](settings); break;
+				default: this.keyChanger[0](settings); break;
+			}
+
+			return Cipher.other.enigma._encodeKey(settings);
+		},
+
+		settings: Cipher.other.enigma.settings,
+
+		_rotorRotate: Cipher.other.enigma._rotorRotate,
+
+
+		_encipher: Cipher.other.enigma._encipher,
+
+		_decipher: Cipher.other.enigma._encipher,
+		
+		_decodeKey: Cipher.other.enigma._decodeKey,
+
+		_encodeKey: Cipher.other.enigma._encodeKey,
+
+		_getFullKey: Cipher.other.enigma._getFullKey,
+
+		_getKeyPhrase: Cipher.other.enigma._getKeyPhrase,
+		
+	},
+
 	
 
 	// _identify: Determines what kind of cipher(s) a particular cipher text is enciphered with.
@@ -524,25 +628,29 @@ const Solver = {
 	},
 
 	// _solve: Deciphers a cipher text given a set of ciphers.
-	_solve: function(startKey = "", ct, ciphers, Temp = 20, Step = 0.2, Count = 50000, stopWhenNear = true) {
-		
+	_solve: function(startKey = [''], ct = '', ciphers, Temp = 20, Step = 0.2, Count = 50000, stopWhenNear = true) {
+		// -console.log(startKey);
 		// For the time being, we will only be dealing with single cipher auto-solving.
 		var numCiphers = ciphers.length;
 		var cipher = ciphers[0];
 
-		var cipherOps = this[cipher];
+		var cipherOps = [];
 		//console.log(cipherOps);
 		// Format key for type of cipher:
-		var key = cipherOps._getFullKey(startKey);
+		var keys = [];
+		var pt = ct;
+		for (var i = 0; i < ciphers.length; i++) {
+			cipherOps[i] = this[ciphers[i]];
+			keys[i] = cipherOps[i]._getFullKey(startKey[i]);
+			pt = cipherOps[i]._decipher(keys[i], pt);
+			if (typeof pt !== 'string') pt = pt[0];
+		}
 
-		// Intialize variables
-		var pt = cipherOps._decipher(key, ct);
 		
-		if (typeof pt !== 'string') pt = pt[0];
 		var	maxFitness = TextFitness._calcFitness(pt),
 			bestFitness = maxFitness,
-			maxKey = key,
-			bestKey = maxKey,
+			maxKeys = [...keys],
+			bestKeys = [...maxKeys],
 			temp = Temp,
 			count = 0,
 			guessFitness = TextFitness._calcGuessFitness(ct.length),
@@ -550,36 +658,40 @@ const Solver = {
 			stillSearching = true;
 			postMessage({
 				task: "solve_newBestKey",
-				data: [[bestKey], [bestFitness]]
+				data: [bestKeys, [bestFitness]]
 			})
 		// The main loop
 		while (stillSearching && temp >= 0) {
-			var newKey 		= cipherOps._changeKey(maxKey, pt.length);
-				pt 			= cipherOps._decipher(newKey, ct);
-				
-			if (typeof pt !== 'string') pt = pt[0];
+			var r = count % ciphers.length;
+			var newKeys = [];
+				pt = ct;
+			for (var i = 0; i < ciphers.length; i++) {
+				newKeys[i] = r == i ? cipherOps[i]._changeKey(maxKeys[i], pt.length, pt) : maxKeys[i];
+				pt = cipherOps[i]._decipher(newKeys[i], pt);
+				if (typeof pt !== 'string') pt = pt[0];
+			}
 			var newFitness 	= TextFitness._calcFitness(pt),
 				dF 			= newFitness - maxFitness;
 
 			if (dF >= 0) {
 				maxFitness 	= newFitness;
-				maxKey 		= newKey;
+				maxKeys 	= [...newKeys];
 			} else if (temp > 0) {
 				if (Math.exp(dF/temp) > Math.random()) {
 					maxFitness 	= newFitness;
-					maxKey 		= newKey;
+					maxKeys 	= [...newKeys];
 				}
 			}
 			//console.log(newKey);
 			if (maxFitness > bestFitness) {	
 				bestFitness = maxFitness;
-				bestKey 	= maxKey;
+				bestKeys 	= [...maxKeys];
 				attempts 	= 0;
 				postMessage({
 					task: "solve_newBestKey",
-					data: [[bestKey], [bestFitness]]
+					data: [bestKeys, [bestFitness]]
 				});
-				console.log("New best Key: ", bestKey, bestFitness);
+				console.log("New best Key: ", bestKeys, bestFitness);
 			}
 
 
@@ -596,12 +708,15 @@ const Solver = {
 				if (attempts > 1000) stillSearching = false;
 
 			}
+			
 		}
-		
-		pt = cipherOps._decipher(bestKey, ct);
-		if (typeof pt !== 'string') pt = pt[0];
+		pt = ct;
+		for (var i = 0; i < ciphers.length; i++) {
+			pt = cipherOps[i]._decipher(bestKeys[i], pt);
+			if (typeof pt !== 'string') pt = pt[0];
+		}
 		return {
-			key: [cipherOps._getKeyPhrase(bestKey)],
+			key: bestKeys,
 			pt: pt
 		}
 		

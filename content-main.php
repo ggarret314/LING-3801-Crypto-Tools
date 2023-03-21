@@ -26,8 +26,12 @@
 		<h3>Transposition</h3>
 		<ul class="cipher-list">
 			<li><a href="<?php echo $__ROOTDIR__ ?>trans/columnar">Columnar</a></li>
-			<li><a href="<?php echo $__ROOTDIR__ ?>trans/railfence">Railfence</a></li>
+			<!--<li><a href="<?php echo $__ROOTDIR__ ?>trans/railfence">Railfence</a></li>!-->
 		</ul>
+		<!--<h3>Other</h3>
+		<ul class="cipher-list">
+			<li><a href="<?php echo $__ROOTDIR__ ?>other/enigma">Enigma</a></li>
+		</ul>!-->
 		<!--
 		<div class="page-description">
 			The Auto-Solver makes use of a <a href="https://en.wikipedia.org/wiki/Simulated_annealing">Simulated Annealing algorithm</a>, where

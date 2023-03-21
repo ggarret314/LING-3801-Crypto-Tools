@@ -155,6 +155,39 @@ export const Cipher = {
 			},
 		},
 
+		progvigenere: {
+			_encipher: function (key, pt) {
+				var ct = "";
+		
+				for (var i = 0; i < pt.length; i++) {
+					var a = Alphabet.indexOf(key[i % key.length]),
+						b = Alphabet[(Alphabet.indexOf(pt[i]) + a) % 26]
+					ct += Alphabet[(Alphabet.indexOf(pt[i]) + b) % 26];
+				}
+		
+				return ct;
+			},
+
+			_decipher: function(key, ct) {
+				var pt = "";
+				for (var i = 0; i < ct.length; i++) {
+					var a = Alphabet.indexOf(key[i % key.length]);
+					pt += Alphabet[(Alphabet.indexOf(ct[i]) - a + 26) % 26];
+				}
+		
+				return pt;
+			},
+
+			// Just sanitize
+			_getFullKey: function (key) {
+				return text_sanitize(key);
+			},
+
+			_getKeyPhrase: function (key) {
+				return key;
+			},
+		},
+
 		vigenere: {
 			// Encipher a plaintext with a vigenere key.
 			_encipher: function (key, pt) {
@@ -407,12 +440,7 @@ export const Cipher = {
 
 			},
 
-			_encipher: function (key, pt) {
-				// key format:
-				// r1AAr2AAr3AA|bQtSmN
-				// (r[rotor 1][ring setting][rotor offset])*|[plugboard]
-				
-				// decode key 
+			_decodeKey: function (key) {
 				var settings = {
 					rotors: [],
 					plugboard: {},
@@ -429,12 +457,14 @@ export const Cipher = {
 					}
 
 					if (rotors) {
-						var rotorOG = this.settings.rotor[parseInt(key[index + 1])]
+						var rotorOG = this.settings.rotor[parseInt(key[index + 1])];
+						//console.log(key, rotorOG);
 						var rotor = {
-							alphabet: rotorOG.defaultAlphabet,
-							ring: rotorOG.defaultAlphabet.indexOf(key[index + 2]),
-							pos: rotorOG.defaultAlphabet.indexOf(key[index + 3]),
-							turnOver: rotorOG.defaultAlphabet.indexOf(rotorOG.turnover),
+							og: parseInt(key[index + 1]),
+							alphabet: rotorOG.defaultAlphabet.split('').map(c => Alphabet.indexOf(c)),
+							ring: Alphabet.indexOf(key[index + 2]),
+							pos: Alphabet.indexOf(key[index + 3]),
+							turnOver: Alphabet.indexOf(rotorOG.turnover),
 						};
 
 						settings.rotors.push(rotor);
@@ -448,7 +478,32 @@ export const Cipher = {
 					}
 				};
 
-				console.log(settings);
+				return settings;
+			},
+
+			_encodeKey: function (settings) {
+				var key = "";
+				for (var i = 0; i < settings.rotors.length; i++) {
+					key += "r" + settings.rotors[i].og + Alphabet[settings.rotors[i].ring] + Alphabet[settings.rotors[i].pos];
+				}
+				key += "|";
+				var plugs = [];
+				for (var letter in settings.plugboard) {
+					if (plugs.indexOf(settings.plugboard[letter]) == -1) key += letter + settings.plugboard[letter];
+				}
+
+				return key;
+			},
+
+			_encipher: function (key, pt) {
+				// key format:
+				// r1AAr2AAr3AA|bQtSmN
+				// (r[rotor 1][ring setting][rotor offset])*|[plugboard]
+				
+				// decode key 
+				var settings = this._decodeKey(key);
+
+				//console.log(settings);
 
 				var ct = "";
 
@@ -460,8 +515,21 @@ export const Cipher = {
 					// swap letter with plugboard (if any)
 					if (Alphabet[letter] in settings.plugboard) letter = Alphabet.indexOf(settings.plugboard[Alphabet[letter]]);
 					
+
 					// pass through rotors
 					for (var j = 0; j < settings.rotors.length; j++) {
+						
+						
+						letter = (letter + settings.rotors[j].pos) % 26;
+
+						letter = (26 + letter - settings.rotors[j].ring) % 26;
+
+						letter = settings.rotors[j].alphabet[letter];
+
+						letter = (letter + settings.rotors[j].ring) % 26;
+						letter = (26 + letter - settings.rotors[j].pos) % 26;
+
+						/*
 						letter = (letter + settings.rotors[j].pos) % 26;
 						
 						letter = (26 + letter - settings.rotors[j].ring) % 26;
@@ -471,6 +539,7 @@ export const Cipher = {
 						letter = (letter + settings.rotors[j].ring) % 26;
 
 						letter = (26 + letter - settings.rotors[j].pos) % 26;
+						*/
 					}
 
 
@@ -483,11 +552,23 @@ export const Cipher = {
 						
 						letter = (26 + letter - settings.rotors[j].ring) % 26;
 						
+						letter = settings.rotors[j].alphabet.indexOf(letter);
+						
+						letter = (letter + settings.rotors[j].ring) % 26;
+
+						letter = (26 + letter - settings.rotors[j].pos) % 26;
+
+						/*
+						letter = (letter + settings.rotors[j].pos) % 26;
+						
+						letter = (26 + letter - settings.rotors[j].ring) % 26;
+						
 						letter = settings.rotors[j].alphabet.indexOf(Alphabet[letter]);
 						
 						letter = (letter + settings.rotors[j].ring) % 26;
 
 						letter = (26 + letter - settings.rotors[j].pos) % 26;
+						*/
 					}
 
 					// swap letter with plugboard (if any) again
@@ -497,47 +578,12 @@ export const Cipher = {
 				}
 				
 				return ct;
-
-				/*
-				//Rotors (forward)
-				
-				for (i=0; i<3; i++) {
-					c += p->pos[i]-'A';
-					
-					if (c>'Z') c -= 26;
-					
-					c -= p->rings[i]-'A';
-					if (c<'A') c += 26;
-					
-					c=rotor[p->order[i]-1][c-'A'];
-					
-					c += p->rings[i]-'A';
-					if (c>'Z') c -= 26;
-					
-					c -= p->pos[i]-'A';
-					if (c<'A') c += 26;
-				}
-				// Reflecting rotor 
-				c=ref[c-'A'];
-				
-				// Rotors (reverse) 
-				for (i=3; i; i--) {
-					c += p->pos[i-1]-'A';
-					if (c>'Z')
-c -= 26;
-					c -= p->rings[i-1]-'A';
-					if (c<'A')
-c += 26;
-					for (j=0; j<26; j++)
-					if (rotor[p->order[i-1]-1][j]==c)
-					break;
-					c=j+'A';
-					c += p->rings[i-1]-'A';
-					if (c>'Z')
-					c -= 26;
-					c -= p->pos[i-1]-'A';
-				*/
 			},
+
+			_decipher: function (key, pt) {
+				return this._encipher(key, pt);
+			},
+
 
 			_rotorRotate: function (rotors) {
 				if (rotors.length == 0) return;
@@ -553,7 +599,17 @@ c += 26;
 					i++;
 				} while (flipping && i < rotors.length);
 				
-			}
+			},
+
+			_getFullKey: function (key) { 
+				try {
+					this._decodeKey(key);
+				} catch (e) { return "r1AAr2AAr3AA|" }
+
+				return key;
+			},
+
+			_getKeyPhrase: function (key) { return key },
 		}
 	}
 }

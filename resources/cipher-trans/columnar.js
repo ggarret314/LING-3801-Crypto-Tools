@@ -44,7 +44,7 @@ const ColumnarTransCipher = {
         var ct = text_sanitize(this.ele.textareaCiphertext.value),
             key = this.key,
             pt = Cipher.trans.columnar._decipher(key, ct);
-
+		console.log(pt);
         this.ele.textareaPlaintext.value = (this.ele.checkboxAutoSpaces.checked ? WordFinder._wordFind(pt) : pt).toLowerCase();
     },
 
