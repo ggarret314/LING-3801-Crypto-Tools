@@ -4,7 +4,7 @@
 		More detail behind the playfair cipher and the cryptanalysis <a href="<?php echo $__ROOTDIR__ ?>digraph/playfair/explain">here</a>.
 	</p>
 	<div class="page-content">
-		<?php require_once("module/cipherdirection.php") ?>
+		<?php require_once("modules/cipherdirection.php") ?>
 		<div id="decipher-box">
 			<div class="page-section-title">Cipher Text</div>
 			<div class="textarea-container">
@@ -78,4 +78,4 @@
 	</div>
 
 </div>
-<script src="<?php echo $__ROOTDIR__ ?>resources/cipher-digraph/playfair.js" type="module"></script>
+<script src="<?php echo $__ROOTDIR__ ?>resources/page_scripts/playfair.js" type="module"></script>

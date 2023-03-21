@@ -15,41 +15,15 @@ for($i = 0; $i < count($params); $i+=2) {
 
 // Valid page names. Anything else the user attempts to access is discarded.
 $pageNames = array(
-	"mono", "poly", "digraph", "trans", "auto", "other"
+	"auto", "shift", "substitution", "vigenere", "playfair", "columnar", "enigma"
 );
-
-$pageScripts = array();
-
-$page_bottomscripts = array();
-array_push($page_bottomscripts, "{$__ROOTDIR__}resources/main.js");
-array_push($page_bottomscripts, "{$__ROOTDIR__}resources/quadgrams.js");
-
-switch($params[0]) {
-	case "mono":
-	case "poly":
-	case "digraph":
-	case "trans":
-	case "auto":
-		array_push($page_bottomscripts, "{$__ROOTDIR__}resources/{$params[0]}.js");
-		break;
-
-	/*
-	case "shift":
-	case "monoalphabetic":
-	case "vigenere":
-	case "playfair":
-	case "auto";
-		array_push($page_bottomscripts, "{$__ROOTDIR__}resources/{$params[0]}.js");
-		break;
-	*/
-}
 
 include_once("page-header.php");
 
 // Determine if accessing valid page.
 if (in_array($params[0],$pageNames)) {
 	//  If so, include the page.
-	require_once("content-{$params[0]}.php");
+	require_once("pages/{$params[0]}.php");
 } elseif (empty($params[0])) {
 	require_once("content-main.php");	
 } else {

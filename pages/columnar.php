@@ -4,7 +4,7 @@
 		More detail behind the columnar transposition cipher and the cryptanalysis <a href="<?php echo $__ROOTDIR__ ?>trans/columnar/explain">here</a>.
 	</p>
 	<div class="page-content">
-		<?php require_once("module/cipherdirection.php") ?>
+		<?php require_once("modules/cipherdirection.php") ?>
 		<div id="decipher-box">
 			<div class="page-section-title">Cipher Text</div>
 			<div class="textarea-container">
@@ -27,4 +27,4 @@
 	</div>
 
 </div>
-<script src="<?php echo $__ROOTDIR__ ?>resources/cipher-trans/columnar.js" type="module"></script>
+<script src="<?php echo $__ROOTDIR__ ?>resources/page_scripts/columnar.js" type="module"></script>

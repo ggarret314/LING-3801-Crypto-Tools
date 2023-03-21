@@ -4,7 +4,7 @@
 		More detail behind the shift cipher and the cryptanalysis <a href="<?php echo $__ROOTDIR__ ?>mono/shift/explain">here</a>.
 	</p>
 	<div class="page-content">
-		<?php require_once("module/cipherdirection.php") ?>
+		<?php require_once("modules/cipherdirection.php") ?>
 		<div id="decipher-box">
 			<div class="page-section-title">Cipher Text</div>
 			<div class="textarea-container">
@@ -36,4 +36,4 @@
 	</div>
 
 </div>
-<script src="<?php echo $__ROOTDIR__ ?>resources/cipher-mono/shift.js" type="module"></script>
+<script src="<?php echo $__ROOTDIR__ ?>resources/page_scripts/shift.js" type="module"></script>

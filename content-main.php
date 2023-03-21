@@ -12,20 +12,20 @@
 		<h2>Ciphers Available</h2>
 		<h3>Monoalphabetic</h3>
 		<ul class="cipher-list">
-			<li><a href="<?php echo $__ROOTDIR__ ?>mono/shift">Shift</a></li>
-			<li><a href="<?php echo $__ROOTDIR__ ?>mono/substitution">Substitution</a></li>
+			<li><a href="<?php echo $__ROOTDIR__ ?>shift">Shift</a></li>
+			<li><a href="<?php echo $__ROOTDIR__ ?>substitution">Substitution</a></li>
 		</ul>
 		<h3>Polyalphabetic</h3>
 		<ul class="cipher-list">
-			<li><a href="<?php echo $__ROOTDIR__ ?>poly/vigenere">Vigenere</a></li>
+			<li><a href="<?php echo $__ROOTDIR__ ?>vigenere">Vigenere</a></li>
 		</ul>
 		<h3>Digraph</h3>
 		<ul class="cipher-list">
-			<li><a href="<?php echo $__ROOTDIR__ ?>digraph/playfair">Playfair</a></li>
+			<li><a href="<?php echo $__ROOTDIR__ ?>playfair">Playfair</a></li>
 		</ul>
 		<h3>Transposition</h3>
 		<ul class="cipher-list">
-			<li><a href="<?php echo $__ROOTDIR__ ?>trans/columnar">Columnar</a></li>
+			<li><a href="<?php echo $__ROOTDIR__ ?>columnar">Columnar</a></li>
 			<!--<li><a href="<?php echo $__ROOTDIR__ ?>trans/railfence">Railfence</a></li>!-->
 		</ul>
 		<!--<h3>Other</h3>

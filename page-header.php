@@ -18,17 +18,17 @@
 		</div><div class="nav-item">
 			<a href="<?php echo $__ROOTDIR__ ?>auto">Auto-Solver</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>mono/shift">Shift</a>
+			<a href="<?php echo $__ROOTDIR__ ?>shift">Shift</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>mono/substitution">Substitution</a>
+			<a href="<?php echo $__ROOTDIR__ ?>substitution">Substitution</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>poly/vigenere">Vigenere</a>
+			<a href="<?php echo $__ROOTDIR__ ?>vigenere">Vigenere</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>digraph/playfair">Playfair</a>
+			<a href="<?php echo $__ROOTDIR__ ?>playfair">Playfair</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>trans/columnar">Column Trans</a>
+			<a href="<?php echo $__ROOTDIR__ ?>columnar">Column Trans</a>
 		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>other/enigma">Enigma</a>
+			<a href="<?php echo $__ROOTDIR__ ?>enigma">Enigma</a>
 		</div>
 	</nav>
 	<div class="grey-hr"></div>

@@ -4,7 +4,7 @@
 		More detail behind the vigenere cipher and the cryptanalysis <a href="<?php echo $__ROOTDIR__ ?>poly/vigenere/explain">here</a>.
 	</p>
 	<div class="page-content">
-		<?php require_once("module/cipherdirection.php") ?>
+		<?php require_once("modules/cipherdirection.php") ?>
 		<div id="decipher-box">
 			<div class="page-section-title">Cipher Text</div>
 			<div class="textarea-container">
@@ -45,4 +45,4 @@
 		</div>
 	</div>
 </div>
-<script src="<?php echo $__ROOTDIR__ ?>resources/cipher-poly/vigenere.js" type="module"></script>
+<script src="<?php echo $__ROOTDIR__ ?>resources/page_scripts/vigenere.js" type="module"></script>

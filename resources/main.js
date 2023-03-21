@@ -1,5 +1,5 @@
-import { Quadgrams } from './quadgrams.js';
-import { Words } from './words.js';
+import { Quadgrams } from './data/quadgrams.js';
+import { Words } from './data/words.js';
 
 // Everything here was written by Garret Gallion
 

@@ -1,6 +1,6 @@
 import { Alphabet, text_sanitize, WordFinder } from '../main.js';
 import { Cipher } from '../cipher.js';
-import { CipherDirection } from '../cipherdirection.js';
+import { CipherDirection } from '../classes/cipherdirection.js';
 
 
 

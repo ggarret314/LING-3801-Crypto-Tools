@@ -1,4 +1,4 @@
-import { EnglishFrequencies } from './main.js';
+import { EnglishFrequencies } from '../main.js';
 
 export class FrequencyTable {
 	constructor(container, options) {
