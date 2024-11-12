@@ -1,8 +1,8 @@
 import { Alphabet, text_sanitize, WordFinder, EnglishFrequencies } from '../main.js';
 import { Cipher } from '../cipher.js';
-import { CipherDirection } from '../cipherdirection.js';
-import { FrequencyTable } from '../frequencytable.js';
-import { DecipheringContainer } from '../classes/cipherdirection.js';
+import { CipherDirection } from '../classes/cipherdirection.js';
+import { FrequencyTable } from '../classes/frequencytable.js';
+import { DecipheringContainer } from '../classes/decipheringcontainer.js';
 
 // PlayfairCipher: holds the code for playfair cipher
 const PlayfairCipher = {

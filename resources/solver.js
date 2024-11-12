@@ -259,7 +259,7 @@ const Solver = {
 			// 3: Add / remove a letter
 			(grid) => {
 				if (Math.random() > 0.5) grid.splice(grid.length - 1, 1);
-				else grid.push('A');
+				else if (grid.length < 17) grid.push('A');
 			}
 		],
 
@@ -511,7 +511,7 @@ const Solver = {
 					// increase length
 					//console.log(ptLength, "increase");
 					grid.push(grid.length);
-					while (ptLength % grid.length !== 0 && grid.length < 32) grid.push(grid.length);
+					while (ptLength % grid.length !== 0 && grid.length < 25) grid.push(grid.length);
 					if (ptLength % grid.length !== 0) {
 						while (ptLength % grid.length !== 0) grid.splice(grid.indexOf(grid.length - 1), 1);
 					}
@@ -618,7 +618,114 @@ const Solver = {
 		
 	},
 
-	
+	adfgx: {
+
+		keyChanger: [
+			// 0: Swaps two letters in the key at random
+			(grid) => {
+				var letter1 = Math.floor(Math.random() * 25);
+				var letter2 = Math.floor(Math.random() * 25);
+		
+				var letter = grid[letter1];
+				grid[letter1] = grid[letter2];
+				grid[letter2] = letter;
+			},
+			
+			// 1: Change columnar order
+			(grid) => {
+				var num1 = Math.floor(Math.random() * grid.length),
+					num2 = Math.floor(Math.random() * grid.length),
+					num  = grid[num1];
+				
+				grid[num1] = grid[num2];
+				grid[num2] = num;
+			},
+
+			// 2: Change columnar size
+			(grid) => {
+				if (Math.random() > 0.5) {
+					if (grid.length < 16) {
+						grid.push(grid.length);
+					} else {
+						if (grid.length > 1) grid.splice(grid.indexOf(grid.length - 1), 1);
+					}
+				}
+			}
+		],
+
+		_decodeKey: Cipher.other.adfgx._decodeKey,
+
+		_encodeKey: Cipher.other.adfgx._encodeKey,
+
+		_changeKey: function (key) {
+			var grid = key.substring(0, key.indexOf('|')).split("");
+			var grid2 = Cipher.trans.columnar._keyNumberify(key.substring(key.indexOf('|') + 1));
+			var r = Math.floor(Math.random() * 40);
+			switch (r) {
+				//case 0: this.keyChanger[2](grid2); break;
+				//case 1: this.keyChanger[2](grid); break;
+				//case 2: this.keyChanger[3](grid); break;
+				//case 3: this.keyChanger[4](grid); break;
+				//case 4: this.keyChanger[5](grid); break;
+				default: Math.random() > 0.7 ? this.keyChanger[0](grid) : this.keyChanger[1](grid2); break;
+				
+			}
+			//console.log(grid.join("") + "|" + Cipher.trans.columnar._keyStringify(grid2));
+			return grid.join("") + "|" + Cipher.trans.columnar._keyStringify(grid2);
+		},
+
+		_encipher: Cipher.other.adfgx._encipher,
+
+		_decipher: Cipher.other.adfgx._decipher,
+
+		_getFullKey: Cipher.other.adfgx._getFullKey,
+
+		_getKeyPhrase: Cipher.other.adfgx._getKeyPhrase,
+
+
+	},
+
+	grandpre: {
+
+		keyChanger: [
+			// 0: Change a letter
+			(grid) => {
+				var letter = Math.floor(Math.random() * 100);
+				
+				grid[letter] = Alphabet[Math.floor(Math.random() * Alphabet.length)];
+			},
+
+			// 1: Swaps two letters in the key at random
+			(grid) => {
+				var letter1 = Math.floor(Math.random() * 100);
+				var letter2 = Math.floor(Math.random() * 100);
+		
+				var letter = grid[letter1];
+				grid[letter1] = grid[letter2];
+				grid[letter2] = letter;
+			},
+		],
+
+		_changeKey: function (key) {
+			var grid = key.split('');
+			var r = Math.floor(Math.random() * 10);
+			switch (r) {
+				case 0: this.keyChanger[1](grid); break;
+				default: this.keyChanger[0](grid); break;
+				
+			}
+			//console.log(grid.join("") + "|" + Cipher.trans.columnar._keyStringify(grid2));
+			return grid.join("");
+		},
+
+		_encipher: Cipher.other.grandpre._encipher,
+
+		_decipher: Cipher.other.grandpre._decipher,
+
+		_getFullKey: Cipher.other.grandpre._getFullKey,
+
+		_getKeyPhrase: Cipher.other.grandpre._getKeyPhrase,
+	},
 
 	// _identify: Determines what kind of cipher(s) a particular cipher text is enciphered with.
 	// 			  returns an array of the ciphers.
@@ -630,7 +737,6 @@ const Solver = {
 	// _solve: Deciphers a cipher text given a set of ciphers.
 	_solve: function(startKey = [''], ct = '', ciphers, Temp = 20, Step = 0.2, Count = 50000, stopWhenNear = true) {
 		// -console.log(startKey);
-		// For the time being, we will only be dealing with single cipher auto-solving.
 		var numCiphers = ciphers.length;
 		var cipher = ciphers[0];
 
@@ -646,6 +752,7 @@ const Solver = {
 			if (typeof pt !== 'string') pt = pt[0];
 		}
 
+		//console.log(ct);
 		
 		var	maxFitness = TextFitness._calcFitness(pt),
 			bestFitness = maxFitness,
@@ -665,9 +772,11 @@ const Solver = {
 			var r = count % ciphers.length;
 			var newKeys = [];
 				pt = ct;
+				//console.log("test");
 			for (var i = 0; i < ciphers.length; i++) {
 				newKeys[i] = r == i ? cipherOps[i]._changeKey(maxKeys[i], pt.length, pt) : maxKeys[i];
 				pt = cipherOps[i]._decipher(newKeys[i], pt);
+				
 				if (typeof pt !== 'string') pt = pt[0];
 			}
 			var newFitness 	= TextFitness._calcFitness(pt),
@@ -705,7 +814,7 @@ const Solver = {
 			// Determine if fitness is close enough to give up the search
 			if (bestFitness / guessFitness < 1.10) {
 				attempts++;
-				if (attempts > 1000) stillSearching = false;
+				//if (attempts > 1000) stillSearching = false;
 
 			}
 			

@@ -15,21 +15,10 @@
 	<nav>
 		<div class="nav-item">
 			<a href="<?php echo $__ROOTDIR__ ?>">Home</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>auto">Auto-Solver</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>shift">Shift</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>substitution">Substitution</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>vigenere">Vigenere</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>playfair">Playfair</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>columnar">Column Trans</a>
-		</div><div class="nav-item">
-			<a href="<?php echo $__ROOTDIR__ ?>enigma">Enigma</a>
-		</div>
+		</div><?php for ($i = 0; $i < count($pageTitles); $i++): ?>
+		<div class="nav-item">
+			<a href="<?php echo $__ROOTDIR__ . $pageNames[$i] ?>"><?php echo $pageTitles[$i] ?></a>
+		</div><?php endfor ?>
 	</nav>
 	<div class="grey-hr"></div>
 </header>

@@ -3,7 +3,4 @@ RewriteEngine On
 ErrorDocument 404 error-404.php
 ErrorDocument 500 error-500.php
 RewriteRule ^(resources|favicon.ico)($|/) - [L]
-#RewriteRule ^(account.*)$ account.php?dets=$1 [NC,QSA,L]
-#RewriteRule ^invoice(.*)$ invoice.php?dets=invoice$1 [NC,QSA,L]
-#RewriteRule ^dashboard(.*)$ dashboard.php?dets=dashboard$1 [NC,QSA,L]
 RewriteRule ^(.*)$ index.php?dets=$1 [NC,QSA]

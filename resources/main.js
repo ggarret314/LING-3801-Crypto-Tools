@@ -19,7 +19,7 @@ function _get(url, callback, formdata=null) {
 
 
 // Sanitizer
-export function text_sanitize(s) { return s.toUpperCase().replace(/[^A-Z]/g, "") }
+export function text_sanitize(s) { return s.toUpperCase().replace(/[^A-Z0-9]/g, "") }
 
 // Alphabet: The alphabet A-Z as a string.
 export const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

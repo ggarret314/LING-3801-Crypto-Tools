@@ -31,6 +31,8 @@ const Auto = {
 		playfair: 'digraph',
 		columnar: 'trans',
 		enigma: 'other',
+		adfgx: 'other',
+		grandpre: 'other',
 	},
 
 	availableCiphers: [
@@ -42,6 +44,8 @@ const Auto = {
 		['Playfair', 'playfair'],
 		['Columnar Trans', 'columnar'],
 		['Enigma', 'enigma'],
+		['ADFGX', 'adfgx'],
+		['Grandpre', 'grandpre'],
 	],
 
 	_decipher: function () {
@@ -57,7 +61,7 @@ const Auto = {
 
 	solver: new Worker('./resources/solver.js', { type: 'module' }),
 
-	_sendSolveMessage: function (startKey, ct, ciphers, temp = 20, step = 0.2, count = 50000, stopWhenNear = true) {
+	_sendSolveMessage: function (startKey, ct, ciphers, temp = 100, step = 0.2, count = 50000, stopWhenNear = true) {
 		this.solver.postMessage({
 			task: "solve",
 			args: {
@@ -148,15 +152,15 @@ Auto._init();
 
 //Auto._sendSolveMessage('', '', ['playfair']);
 
-var msg = text_sanitize("Her eyebrows were a shade darker than her hair. They were thick and almost horizontal, emphasizing the depth of her eyes. She was rather handsome than beautiful. Her face was captivating by reason of a certain frankness of expression and a contradictory subtle play of features. Her manner was engaging.");
-var key = "r5HDr1QFr2GH|";
+//var msg = text_sanitize("Her eyebrows were a shade darker than her hair. They were thick and almost horizontal, emphasizing the depth of her eyes. She was rather handsome than beautiful. Her face was captivating by reason of a certain frankness of expression and a contradictory subtle play of features. Her manner was engaging.");
+//var key = "r5HDr1QFr2GH|";
 
-console.log(msg);
-console.log(text_sanitize("othzhhnunencchqyksomsjznuomstlzbumztqtwfpivisukohhhrdhonfydrensmocdpvymnvlcyepgqzniiltyekhukanjewztytrgumqobrviomaovtdskvozhopguljorouqepcnwnarggmyjbmeqjzdcpgycyqxtiychdemwspxhtdlfrduibaunlaftaurjzzqmohyxfrbaxthvrubivvydomfpdsjhqveunjvvmdcldfiecmfk"));
-var enigmaCode = Cipher.other.enigma._encipher(key, msg);
+//console.log(msg);
+//console.log(text_sanitize("othzhhnunencchqyksomsjznuomstlzbumztqtwfpivisukohhhrdhonfydrensmocdpvymnvlcyepgqzniiltyekhukanjewztytrgumqobrviomaovtdskvozhopguljorouqepcnwnarggmyjbmeqjzdcpgycyqxtiychdemwspxhtdlfrduibaunlaftaurjzzqmohyxfrbaxthvrubivvydomfpdsjhqveunjvvmdcldfiecmfk"));
+//var enigmaCode = Cipher.other.enigma._encipher(key, msg);
 
-console.log(enigmaCode);
-console.log(Cipher.other.enigma._encipher(key, enigmaCode));
+//console.log(enigmaCode);
+//console.log(Cipher.other.enigma._encipher(key, enigmaCode));
 
 //Auto.ele.textareaCiphertext.value = enigmaCode;
 
